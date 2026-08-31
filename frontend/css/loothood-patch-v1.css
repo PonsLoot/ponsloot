@@ -908,11 +908,23 @@ body.is-running .induction-modal {
   outline: 2px solid rgba(183, 242, 74, .8);
   outline-offset: -2px;
 }
-/* The button is now words, so it needs a width of its own. Both labels sit in
-   the same fixed box — "copy contract" and "copied" are different lengths, and
-   a chip that changes width the instant it is pressed reads as a glitch rather
-   than as confirmation. */
+/* The button is words now, and both labels are STACKED IN ONE GRID CELL rather
+   than swapped with display:none.
+ *
+ * The first version hid one and showed the other, and I wrote in the comment
+ * that the box was a fixed width. It was not: measured on the live page, the
+ * button went from 146 pixels to 79 the instant it was pressed — "copy
+ * contract" and "copied" are not the same length, and a control that shrinks
+ * by half at the moment of the click reads as a glitch rather than as
+ * confirmation. The comment described an intention; the CSS had `nowrap` and
+ * nothing else.
+ *
+ * Stacked in a grid, both labels always occupy the cell, so the button is
+ * permanently as wide as the longer of the two and `visibility` only decides
+ * which one is painted. Nothing can move. */
 .hb-app .hb-contract__copy {
+  display: grid;
+  place-items: center;
   width: auto;
   padding: 0 13px;
   font-family: 'Alagard', serif;
@@ -920,10 +932,11 @@ body.is-running .induction-modal {
   letter-spacing: .02em;
   white-space: nowrap;
 }
-.hb-app .hb-contract__word--ok { display: none; }
+.hb-app .hb-contract__word { grid-area: 1 / 1; }
+.hb-app .hb-contract__word--ok { visibility: hidden; }
 .hb-app .hb-contract__copy.is-done { background: rgba(183, 242, 74, .9); color: #0d1411; }
-.hb-app .hb-contract__copy.is-done .hb-contract__word { display: none; }
-.hb-app .hb-contract__copy.is-done .hb-contract__word--ok { display: inline; }
+.hb-app .hb-contract__copy.is-done .hb-contract__word { visibility: hidden; }
+.hb-app .hb-contract__copy.is-done .hb-contract__word--ok { visibility: visible; }
 /* On failure the icon stays and only the colour changes: lying with a tick is
    worse than saying nothing. */
 .hb-app .hb-contract__copy.is-failed { background: rgba(255, 210, 74, .22); color: #ffd24a; }
