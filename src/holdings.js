@@ -87,15 +87,29 @@ export async function resolvedEnv(query, env = process.env) {
        WHERE key IN ('TOKEN_ADDRESS','TREASURY_ADDRESS','LAUNCH_FUND_START')`);
     const stored = Object.fromEntries(rows.map((r) => [r.key, r.value]));
     if (!stored.TOKEN_ADDRESS && !stored.TREASURY_ADDRESS && !stored.LAUNCH_FUND_START) return env;
-    /* The environment wins over the stored value — as it does for tickets. The
-       fund start date was added here because otherwise it can be set ONLY by an
-       environment variable, and on launch day there may be no access to the
-       variables: the console was written precisely to switch things on without a
-       rebuild. */
+    /* THE CONSOLE WINS OVER THE ENVIRONMENT. This was the other way round, and
+     * it made the console useless in exactly the case it exists for.
+     *
+     * TOKEN_ADDRESS is set as a Railway variable. With the environment winning,
+     * pasting a new address into the console stored it in app_settings and
+     * changed nothing: the site kept reading the deploy-time value. Same for
+     * clearing — the row is deleted, the variable is still there, and the old
+     * address comes back as if the button did nothing. A control that silently
+     * loses to a stale setting is not a control, it is a decoration that
+     * reports success.
+     *
+     * The precedence now matches intent rather than history. A variable is set
+     * once, at deploy time, by whoever was setting up the service. A stored
+     * value only exists because a person deliberately typed it into the console
+     * afterwards, which is later and more specific. Later and more specific
+     * wins.
+     *
+     * The environment remains the fallback, so a service with no stored value
+     * behaves exactly as before. */
     return { ...env,
-             TOKEN_ADDRESS: env.TOKEN_ADDRESS || stored.TOKEN_ADDRESS || "",
-             TREASURY_ADDRESS: env.TREASURY_ADDRESS || stored.TREASURY_ADDRESS || "",
-             LAUNCH_FUND_START: env.LAUNCH_FUND_START || stored.LAUNCH_FUND_START || "" };
+             TOKEN_ADDRESS: stored.TOKEN_ADDRESS || env.TOKEN_ADDRESS || "",
+             TREASURY_ADDRESS: stored.TREASURY_ADDRESS || env.TREASURY_ADDRESS || "",
+             LAUNCH_FUND_START: stored.LAUNCH_FUND_START || env.LAUNCH_FUND_START || "" };
   } catch {
     // The database is silent — we work off the environment. A missing setting
     // must not take the screen down: without a token it already knows how to say

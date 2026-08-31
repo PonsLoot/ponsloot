@@ -3266,9 +3266,23 @@ export function registerGameRoutes(app, ctx) {
      *
      * Explicit and separate from the empty string, so it can never be reached
      * by accident. */
+    let cleared = false;
     if (req.body?.clearToken === true) {
       await query("DELETE FROM app_settings WHERE key = 'TOKEN_ADDRESS'");
-      updates.push(["TOKEN_ADDRESS", "(cleared)"]);
+      cleared = true;
+      /* NOT pushed into `updates`, and that is the whole point.
+       *
+       * The first version did push ["TOKEN_ADDRESS", "(cleared)"] there, meaning
+       * to report what happened. But `updates` is also the write list: the loop
+       * below inserted the literal string "(cleared)" straight back into
+       * app_settings. The row was deleted and immediately recreated with
+       * nonsense, so clearing produced an address of "(cleared)" that failed
+       * every validity check downstream — the site read it as no token at all,
+       * and the Railway variable that was supposed to reappear never did.
+       *
+       * Caught by the end-to-end check, which sets the variable, overrides it
+       * from the console, clears, and expects the variable back. It came back
+       * as null. */
     }
 
     for (const [key, raw] of [["TOKEN_ADDRESS", req.body?.tokenAddress],
@@ -3299,7 +3313,7 @@ export function registerGameRoutes(app, ctx) {
         updates.push(["ENTRY_RATE_USD", String(usd)]);
       }
     }
-    if (!updates.length) return fail(res, 400, "invalid_input", "Nothing to save.");
+    if (!updates.length && !cleared) return fail(res, 400, "invalid_input", "Nothing to save.");
     try {
       for (const [key, value] of updates) {
         // eslint-disable-next-line no-await-in-loop
@@ -3307,7 +3321,7 @@ export function registerGameRoutes(app, ctx) {
           `INSERT INTO app_settings(key, value, updated_at) VALUES ($1,$2, now())
            ON CONFLICT (key) DO UPDATE SET value = $2, updated_at = now()`, [key, value]);
       }
-      res.json({ ok: true, saved: updates.map(([key]) => key) });
+      res.json({ ok: true, saved: updates.map(([key]) => key), cleared });
     } catch (e) { console.error(e); fail(res, 500, "server_error", "Could not save chain settings."); }
   });
 

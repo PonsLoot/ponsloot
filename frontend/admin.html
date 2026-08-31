@@ -134,6 +134,17 @@
         rows.push(["The site can read the address",
           t.launched ? '<span class="yes">yes</span>' : '<span class="no">no address set</span>']);
         if (t.address) rows.push(["__addr", esc(t.address)]);
+        /* WHICH OF THE TWO SOURCES is in effect. There is a deploy-time Railway
+           variable and a row this page writes, and for a long while the variable
+           silently won — pasting an address did nothing while the page said
+           "Saved". The precedence is fixed, but naming the source is what makes
+           that visible instead of taken on faith. */
+        if (t.source === "environment") {
+          rows.push(["Where it comes from", '<span class="no">the Railway variable</span>']);
+          hint = "This address is the TOKEN_ADDRESS variable set on the service, not something typed here. Saving below overrides it; clearing brings it back.";
+        } else if (t.source === "console") {
+          rows.push(["Where it comes from", '<span class="yes">typed here</span>']);
+        }
         rows.push(["Chain", "<b>" + esc(t.chainId) + "</b>"]);
         if (!t.launched) hint = "Until an address is saved, the header chip stays hidden and the payout pool says the token has not launched.";
         return fetch("/api/v1/holdings/me", { credentials: "include" })

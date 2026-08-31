@@ -727,9 +727,23 @@ app.get("/api/v1/token", async (_req, res) => {
     const env = await holdings.resolvedEnv(query);
     const address = String(env.TOKEN_ADDRESS || "").trim();
     const valid = /^0x[0-9a-fA-F]{40}$/.test(address);
+    /* WHERE THE ADDRESS CAME FROM, said out loud.
+     *
+     * TOKEN_ADDRESS exists in two places: a Railway variable set once at deploy
+     * time, and a row the launch console writes. The variable used to win, so
+     * pasting a new address stored it and changed nothing while the page
+     * reported success. The precedence is fixed now — the console wins — but
+     * "which of the two am I looking at" is the first question anyone debugging
+     * this asks, and answering it used to take two files and a dashboard.
+     *
+     * Public, like the address itself. It names a source, never a value. */
+    const fromEnvironment = String(process.env.TOKEN_ADDRESS || "").trim().toLowerCase();
+    const source = !valid ? null
+      : (fromEnvironment && address.toLowerCase() === fromEnvironment ? "environment" : "console");
     res.json({
       address: valid ? address : null,
       launched: valid,
+      source,
       chainId: Number(process.env.CHAIN_ID) || 4663,
     });
   } catch (e) {
