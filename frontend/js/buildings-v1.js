@@ -252,10 +252,16 @@
    * on how many players there are, nor on whether the fund has been started.
    */
   const FEE_RATE = "0.7%";
+  /* The same rate as a number, in basis points, because the server multiplies
+   * by it and cannot parse a label. One place, two shapes: a string that ends
+   * up on a card and an integer that ends up in arithmetic. Two literals is how
+   * a screen and a payout start disagreeing about the same rate. */
+  const FEE_BPS = 70;
 
   return Object.freeze({
     ALL: Object.freeze(BUILDINGS),
     FEE_RATE: FEE_RATE,
+    FEE_BPS: FEE_BPS,
     FEE_LINE: FEE_RATE + " of trading",
     ICONS: ICONS,
     BY_ID: BY_ID,

@@ -13,6 +13,7 @@ import * as coinPulls from "./coin-pulls.js";
 import * as buildingPulls from "./building-pulls.js";
 import * as payoutPool from "./payout-pool.js";
 import * as coins from "./coins.js";
+import * as tradingFee from "./trading-fee.js";
 import * as MANIFEST from "./season-manifest.js";
 
 const PORT = process.env.PORT || 3000;
@@ -314,17 +315,29 @@ app.get("/api/v1/buildings/me", async (req, res) => {
      * Caught in production: the address turned out to have been entered from the
      * control panel long ago, and the discrepancy surfaced the same hour the
      * holding learned to see it. */
+    /* THE FEE IS READ, NOT ASSUMED. It used to be a hardcoded zero with a note
+     * that the number would come from the chain one day. Honest, and it also
+     * made the payout half of the product impossible to verify: paste any
+     * address and everything downstream still says zero, so a working pipe and
+     * a broken one look identical.
+     *
+     * A failed read comes back as zero WITH a reason, and the reason is what
+     * the screen shows — "the index did not answer" is a statement about our
+     * request, a bare zero is a statement about the token. */
+    const fee = await tradingFee.tradingFee24h(env);
     const poolConfig = payoutPool.poolSettings(env);
     const worldPower = await payoutPool.worldPower(query, catalogue);
     const dailyPool = formula.poolPerDay({
-      // The Pons fee will come from the chain once the token exists. For now the
-      // source is marked as waiting, and no made-up number may be substituted
-      // here: it would immediately end up on the storefront as a promise.
-      //
-      // The third source — a cut of the ether paid for rolls — is gone: a roll
-      // costs three boss shards, not ether, and the source was a permanent zero
-      // with a caption promising a paid roll.
-      ponsUsd24h: 0,
+      /* The fee, measured rather than promised: the configured token's 24h
+       * volume from a public index, times the rate the cards print. Zero when
+       * there is no address, when the index did not answer, or when the token
+       * has no pairs — and `fee.reason` says which of the three, so the screen
+       * never has to guess.
+       *
+       * The third source — a cut of the ether paid for rolls — is gone: a roll
+       * costs three boss shards, not ether, and the source was a permanent zero
+       * with a caption promising a paid roll. */
+      ponsUsd24h: fee.usdPerDay,
       tokenLaunched: poolConfig.tokenLaunched,
     });
     const share = formula.shareFor({
@@ -348,6 +361,11 @@ app.get("/api/v1/buildings/me", async (req, res) => {
       bossShards: credits[0]?.boss_shards ?? 0,
       shardsPerRoll: 3,
       pool: dailyPool,
+      /* The fee reading goes out whole, not just its total. The volume and the
+       * pair it came from are what make the number checkable against the same
+       * index anyone else can open — which is the entire reason for showing a
+       * money figure at all. */
+      fee,
       share,
       worldPower,
       // The live coin top: place, price, 24h change, icon. Served together with

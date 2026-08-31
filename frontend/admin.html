@@ -55,6 +55,11 @@
     color: var(--ink); background: var(--lime); border: 1px solid var(--lime);
   }
   button.ghost { background: transparent; color: var(--muted); border-color: var(--line); }
+  .ghost-link {
+    font: inherit; padding: 11px 18px; border-radius: 5px; text-decoration: none;
+    color: var(--lime); background: transparent; border: 1px solid rgba(183,242,74,.4);
+  }
+  .ghost-link:hover { background: rgba(183,242,74,.1); }
   button:disabled { opacity: .45; cursor: default; }
   .out { margin: 12px 0 0; font-size: 13px; min-height: 20px; }
   .out.bad { color: var(--bad); }
@@ -95,7 +100,17 @@
     <p class="note" id="hint"></p>
     <div class="row" style="margin-top:14px">
       <button class="ghost" id="refresh" type="button">Check again</button>
+      <!-- LINKING HAPPENS IN THE GAME, and this is a link rather than a form.
+           The wallet flow signs a message through the account runtime; building
+           a second copy of it here would mean two implementations of the one
+           thing that proves who owns an address, and they would drift. So the
+           page sends you to the place that already does it, and says where to
+           press once you are there. -->
+      <a class="ghost-link" href="/" target="_blank" rel="noopener">Link a wallet →</a>
     </div>
+    <p class="note">Slots only open for a wallet that holds the token. Linking is
+      in the game: <b>Account &amp; Settings → Connect Wallet</b>. Come back here
+      and press Check again.</p>
   </div>
 </div>
 
@@ -147,7 +162,35 @@
         }
         rows.push(["Chain", "<b>" + esc(t.chainId) + "</b>"]);
         if (!t.launched) hint = "Until an address is saved, the header chip stays hidden and the payout pool says the token has not launched.";
-        return fetch("/api/v1/holdings/me", { credentials: "include" })
+        /* THE FEE, SHOWN WITH ITS WORKINGS. A dollar figure on its own is
+           something to take on faith; the volume it came from and the pair it
+           was read on are what make it checkable against the same public index
+           anyone else can open. That is the whole reason the pool can show a
+           number at all before our own token exists — paste someone else's
+           contract and the pipe proves itself. */
+        return fetch("/api/v1/buildings/me", { credentials: "include" })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (b) {
+            var f = b && b.fee;
+            if (!f) return null;
+            var why = {
+              token_not_launched: "no address saved yet",
+              read_failed: "the index did not answer",
+              no_pairs: "this address has no trading pairs",
+              rate_unknown: "the fee rate could not be read"
+            };
+            if (f.reason) {
+              rows.push(["Trading fee", '<span class="no">' + esc(why[f.reason] || f.reason) + "</span>"]);
+            } else {
+              rows.push(["Trading fee", "<b>$" + esc(f.usdPerDay.toLocaleString("en-US", { maximumFractionDigits: 2 })) + "</b> / day"]);
+              rows.push(["24h volume it came from",
+                "$" + esc(Math.round(f.volume24hUsd).toLocaleString("en-US")) + " · " + esc(f.rateBps / 100) + "%"]);
+              if (f.pair) rows.push(["__addr", "pair " + esc(f.pair) + (f.dex ? " on " + esc(f.dex) : "")]);
+            }
+            return b;
+          })
+          .catch(function () { return null; })
+          .then(function () { return fetch("/api/v1/holdings/me", { credentials: "include" }); })
           .then(function (r) { return r.ok ? r.json() : null; })
           .catch(function () { return null; });
       })
