@@ -67,11 +67,16 @@
     // for keys.
     github: "https://github.com/PonsLoot/ponsloot",
 
-    // The picture with the word on it. Text is renamed in a minute, a wordmark
-    // is not: until the file is redrawn the game will be called one thing and
-    // show another.
-    wordmark: "loothood-wordmark-primary.png",
-    mark: "loothood-mark-primary.png"
+    /* The mark. Both of these pointed at the PREVIOUS game's files, and neither
+     * is read by anything — grep finds no consumer of BRAND.mark or
+     * BRAND.wordmark anywhere. That is the only reason the wrong pictures never
+     * showed up: dead fields cannot lie on screen, they lie to whoever reads
+     * the file next and reaches for them.
+     *
+     * The wordmark is gone rather than repointed: there is no PONSLOOT wordmark
+     * image, the word is set in Alagard wherever it appears, and a field naming
+     * a file that does not exist is worse than no field. */
+    mark: "images/ponsloot-mark-v1.jpg"
   };
 
   BRAND.tickerLabel = "$" + BRAND.ticker;
