@@ -3256,6 +3256,21 @@ export function registerGameRoutes(app, ctx) {
       updates.push(["LAUNCH_FUND_START", value]);
     }
 
+    /* CLEARING AN ADDRESS, not just setting one.
+     *
+     * There was no way to take one back. The loop below skips empty values —
+     * sensible, so that a form with a blank field does not wipe a live setting
+     * — but that left "wrong address pasted" as a state with no exit except a
+     * hand-written SQL statement. A launch console you cannot undo is worse
+     * than no console: the one day it is used is the day mistakes happen.
+     *
+     * Explicit and separate from the empty string, so it can never be reached
+     * by accident. */
+    if (req.body?.clearToken === true) {
+      await query("DELETE FROM app_settings WHERE key = 'TOKEN_ADDRESS'");
+      updates.push(["TOKEN_ADDRESS", "(cleared)"]);
+    }
+
     for (const [key, raw] of [["TOKEN_ADDRESS", req.body?.tokenAddress],
                               ["TREASURY_ADDRESS", req.body?.treasuryAddress]]) {
       if (raw === undefined || raw === null || raw === "") continue;

@@ -1,0 +1,205 @@
+<meta charset="utf-8">
+<title>PONSLOOT · contract</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+
+<!-- ONE PAGE, ONE FIELD, ONE BUTTON.
+     ==================================================================
+     There is already a launch console at /launch.html with six sections:
+     readiness, token address, season, granting a ticket, payments, the hunt
+     gate. Every one of them is used at most once, and on launch day the only
+     thing that matters is the contract address. Six sections mean reading six
+     headings to find one field, in a hurry, on the day mistakes are expensive.
+
+     So this page does one thing. Paste the address, press Save, and the panel
+     below says — from the same endpoints the game itself reads, not from what
+     this page just sent — whether the site now sees it.
+
+     WHY THE STATUS PANEL EXISTS AT ALL. "Saved" is not the same as "working".
+     The address goes into app_settings, but slots only open if the chain
+     answers a balanceOf call, and the payout pool only fills if the token
+     actually trades. Reporting "saved" and stopping would have hidden every
+     one of those, and the person who pasted it would be left guessing at
+     numbers that stay at zero. Each line here names its own reason.
+
+     The admin token lives in a field and in memory. It is never stored, never
+     put in the URL, never logged. Reload and it is gone. -->
+<style>
+  :root {
+    --ink: #080b0a; --surf: #0f1613; --line: rgba(234,245,238,.14);
+    --lime: #b7f24a; --ivory: #eaf5ee; --muted: rgba(234,245,238,.5);
+    --gold: #ffd24a; --bad: #ff8a6b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 28px 18px 64px; background: var(--ink); color: var(--ivory);
+    font: 15px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  h1 { font-size: 19px; letter-spacing: .14em; text-transform: uppercase; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 26px; font-size: 13px; }
+  .card {
+    border: 1px solid var(--line); border-radius: 8px; background: var(--surf);
+    padding: 18px; margin: 0 0 16px;
+  }
+  label { display: block; margin: 0 0 14px; }
+  label span { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; letter-spacing: .06em; text-transform: uppercase; }
+  input {
+    width: 100%; padding: 11px 12px; font: inherit; color: var(--ivory);
+    background: #0a100d; border: 1px solid var(--line); border-radius: 5px;
+  }
+  input:focus { outline: none; border-color: var(--lime); }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  button {
+    font: inherit; padding: 11px 18px; border-radius: 5px; cursor: pointer;
+    color: var(--ink); background: var(--lime); border: 1px solid var(--lime);
+  }
+  button.ghost { background: transparent; color: var(--muted); border-color: var(--line); }
+  button:disabled { opacity: .45; cursor: default; }
+  .out { margin: 12px 0 0; font-size: 13px; min-height: 20px; }
+  .out.bad { color: var(--bad); }
+  .out.good { color: var(--lime); }
+
+  dl { margin: 0; display: grid; grid-template-columns: 1fr auto; gap: 9px 14px; align-items: baseline; }
+  dt { color: var(--muted); font-size: 13px; }
+  dd { margin: 0; text-align: right; }
+  dd b { color: var(--gold); font-weight: normal; }
+  dd .no { color: var(--muted); }
+  dd .yes { color: var(--lime); }
+  .addr { font-size: 12px; word-break: break-all; text-align: left; grid-column: 1 / -1; color: rgba(234,245,238,.72); }
+  .note { font-size: 12px; color: var(--muted); margin: 12px 0 0; }
+</style>
+
+<div class="wrap">
+  <h1>Contract</h1>
+  <p class="sub">Paste it, save it, and the site shows it. Nothing else on this page.</p>
+
+  <div class="card">
+    <label><span>Admin token</span>
+      <input id="token" type="password" autocomplete="off" spellcheck="false"
+             placeholder="Railway → Variables → ADMIN_TOKEN"></label>
+    <label><span>Token contract address</span>
+      <input id="addr" spellcheck="false" autocomplete="off"
+             placeholder="0x… 40 hex characters, from the launchpad"></label>
+    <div class="row">
+      <button id="save" type="button">Save</button>
+      <button id="clear" class="ghost" type="button">Clear it</button>
+    </div>
+    <p class="out" id="out"></p>
+  </div>
+
+  <div class="card">
+    <dl id="status">
+      <dt>Loading…</dt><dd></dd>
+    </dl>
+    <p class="note" id="hint"></p>
+    <div class="row" style="margin-top:14px">
+      <button class="ghost" id="refresh" type="button">Check again</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var out = $("out");
+
+  function say(text, kind) {
+    out.textContent = text;
+    out.className = "out" + (kind ? " " + kind : "");
+  }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+
+  /* WHY THE STATUS IS READ FROM THE PUBLIC ENDPOINTS.
+     Asking the admin route what it just stored would only prove that the write
+     happened. These are the exact endpoints the game itself calls, so what this
+     panel shows is what a player sees — which is the question being asked. */
+  function refresh() {
+    var rows = [];
+    var hint = "";
+    return fetch("/api/v1/token", { credentials: "same-origin" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (t) {
+        if (!t) {
+          rows.push(["The site can read the address", '<span class="no">no — the server did not answer</span>']);
+          hint = "The API is not responding. Everything below depends on it.";
+          return null;
+        }
+        rows.push(["The site can read the address",
+          t.launched ? '<span class="yes">yes</span>' : '<span class="no">no address set</span>']);
+        if (t.address) rows.push(["__addr", esc(t.address)]);
+        rows.push(["Chain", "<b>" + esc(t.chainId) + "</b>"]);
+        if (!t.launched) hint = "Until an address is saved, the header chip stays hidden and the payout pool says the token has not launched.";
+        return fetch("/api/v1/holdings/me", { credentials: "include" })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .catch(function () { return null; });
+      })
+      .then(function (h) {
+        if (!h) return;
+        /* Each of these is a separate reason, and they are not
+           interchangeable: "no wallet linked" is the person's doing, "could not
+           read the chain" is ours, and "no token" is neither. Collapsing them
+           into one grey zero is what made the numbers impossible to debug. */
+        var reasons = {
+          token_not_launched: "no address saved yet",
+          no_wallet: "no wallet linked on this browser",
+          read_failed: "the chain did not answer balanceOf — wrong address, or no RPC"
+        };
+        rows.push(["Slots open", h.reason ? '<span class="no">' + esc(reasons[h.reason] || h.reason) + "</span>"
+                                          : "<b>" + esc(h.buildings != null ? h.buildings : "—") + "</b>"]);
+        if (h.reason && reasons[h.reason]) hint = hint || reasons[h.reason];
+      })
+      .catch(function () { /* the rows already gathered are still worth showing */ })
+      .then(function () {
+        $("status").innerHTML = rows.map(function (r) {
+          if (r[0] === "__addr") return '<div class="addr">' + r[1] + "</div>";
+          return "<dt>" + r[0] + "</dt><dd>" + r[1] + "</dd>";
+        }).join("");
+        $("hint").textContent = hint;
+      });
+  }
+
+  function post(body) {
+    var token = $("token").value.trim();
+    if (!token) { say("The admin token is empty.", "bad"); return; }
+    say("Saving…");
+    $("save").disabled = $("clear").disabled = true;
+    fetch("/api/v1/admin/chain", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "content-type": "application/json", "x-loothood-admin": token },
+      body: JSON.stringify(body)
+    })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+      .then(function (res) {
+        if (!res.ok) throw new Error(res.d && res.d.message || "refused");
+        say("Saved. The site sees it immediately — no redeploy.", "good");
+        $("addr").value = "";
+        return refresh();
+      })
+      .catch(function (e) { say(String(e.message || e), "bad"); })
+      .then(function () { $("save").disabled = $("clear").disabled = false; });
+  }
+
+  $("save").addEventListener("click", function () {
+    var a = $("addr").value.trim();
+    // Checked here as well as on the server, because a typo caught before the
+    // request is a typo the person can still see in the field.
+    if (!/^0x[0-9a-fA-F]{40}$/.test(a)) {
+      say("That is not an address: 0x followed by exactly 40 hex characters (this has " + a.length + ").", "bad");
+      return;
+    }
+    post({ tokenAddress: a });
+  });
+
+  $("clear").addEventListener("click", function () { post({ clearToken: true }); });
+  $("refresh").addEventListener("click", refresh);
+  refresh();
+})();
+</script>

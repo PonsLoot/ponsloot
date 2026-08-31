@@ -926,3 +926,58 @@ body.is-running .induction-modal {
   .hb-app .hb-contract { padding-left: 0; }
   .hb-app .hb-contract__copy { border-left: 0; }
 }
+
+/* ── The contract address on the Estate screen ──────────────────────────
+ *
+ * The header chip shows it shortened, which is enough to recognise an address
+ * you already know and useless for telling which one it is. This is the screen
+ * that says "hold the token", so this is where the whole address goes —
+ * selectable, wrapping, with the same copy button.
+ *
+ * Monospace here and not in the header, and that is not an inconsistency: in
+ * the header the address is a label, here it is a value someone checks
+ * character by character, and 0 against O has to be distinguishable. */
+.hb-app .holdings-panel__contract {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 12px 0 0;
+  padding: 9px 11px;
+  border: 1px solid rgba(183, 242, 74, .22);
+  border-radius: 5px;
+  background: rgba(183, 242, 74, .05);
+}
+.hb-app .holdings-panel__contract-label {
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(234, 245, 238, .45);
+}
+.hb-app .holdings-panel__contract-addr {
+  flex: 1 1 260px;
+  min-width: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(234, 245, 238, .84);
+  /* Breaks anywhere: an address has no spaces, and without this it pushes the
+     panel sideways on a narrow screen. */
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+.hb-app .holdings-panel__contract-copy {
+  font-family: 'Alagard', serif;
+  font-size: 12px;
+  line-height: 1;
+  padding: 6px 10px;
+  color: var(--lime, #b7f24a);
+  background: rgba(183, 242, 74, .1);
+  border: 1px solid rgba(183, 242, 74, .3);
+  border-radius: 4px;
+  cursor: pointer;
+}
+.hb-app .holdings-panel__contract-copy:hover { background: rgba(183, 242, 74, .2); }
+.hb-app .holdings-panel__contract-copy.is-done {
+  color: #0d1411; background: var(--lime, #b7f24a); border-color: var(--lime, #b7f24a);
+}

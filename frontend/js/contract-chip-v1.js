@@ -90,10 +90,17 @@
    * "copy" and "copied" are of different lengths, and there is a frame next to
    * it that twitched because of that. Now both icons sit inside the button and
    * one of them is shown. */
-  function flash(button, className) {
+  /* The response is a class, on any button that asked for the copy.
+   *
+   * The header chip swaps two icons by class; the line on the Estate screen is
+   * a word. Both work from the same class because neither is renamed here —
+   * whoever adds a third copy button gets the same feedback without touching
+   * this file. Swapping textContent instead, as the first version did, made
+   * the button jump in width: "copy" and "copied" are different lengths. */
+  function respond(button, cls) {
     button.classList.remove("is-done", "is-failed");
-    button.classList.add(className);
-    root.setTimeout(function () { button.classList.remove(className); }, 1500);
+    button.classList.add(cls);
+    root.setTimeout(function () { button.classList.remove(cls); }, 1500);
   }
 
   document.addEventListener("click", function (e) {

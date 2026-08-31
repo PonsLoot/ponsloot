@@ -36,6 +36,33 @@
    *
    * It leads to the same place as the cog: one linking screen, not a second one
    * next to it. */
+  /* THE CONTRACT ADDRESS, IN FULL, WHERE HOLDING IS EXPLAINED.
+   *
+   * The header chip shows it shortened — 0xe934…bf50 — which is enough to
+   * recognise an address you already know and useless for telling which one it
+   * is. This screen is the one that says "hold the token", so this is where the
+   * question "which token" gets asked, and it gets the whole forty-two
+   * characters, selectable, with the same copy button as the header.
+   *
+   * Hidden entirely while there is no address: an empty field labelled Contract
+   * on a screen about holding a token reads as "the token exists and something
+   * is broken", which is worse than saying nothing.
+   *
+   * The value comes from the shared chip module, so there is one source. Two
+   * places reading the address separately is how they end up disagreeing on the
+   * day it changes.
+   */
+  function contractLine() {
+    const address = root.PonslootContract?.address?.();
+    if (!address) return "";
+    return `<div class="holdings-panel__contract">
+      <span class="holdings-panel__contract-label">Contract</span>
+      <code class="holdings-panel__contract-addr" title="${escapeHtml(address)}">${escapeHtml(address)}</code>
+      <button class="holdings-panel__contract-copy" type="button" data-contract-copy
+              aria-label="Copy contract address">copy</button>
+    </div>`;
+  }
+
   function walletButton() {
     return `<button class="hb-ledger-button is-primary" type="button" data-shell-destination="account-settings">Link wallet</button>`;
   }
@@ -128,6 +155,7 @@
         <div><dt>Held</dt><dd>${known ? formatNumber(summary.held) : "—"}</dd></div>
         <div><dt>Payout rate</dt><dd>×${summary.multiplier}</dd></div>
       </dl>` : ""}
+      ${contractLine()}
       <div class="holdings-panel__actions">
         ${summary.reason === "no_wallet" ? walletButton() : buyLink()}
       </div>
