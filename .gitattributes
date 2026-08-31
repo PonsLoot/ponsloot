@@ -1,0 +1,4 @@
+# .bat files are read by cmd.exe, which requires CRLF. With LF line endings it
+# trips over the parse and closes the window before `pause` — it looks as if
+# the file starts and instantly dies. We walked into this once already.
+*.bat text eol=crlf

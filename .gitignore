@@ -1,0 +1,24 @@
+node_modules/
+.env
+*.log
+
+# Keys. The folder sits inside the working directory, and `git add .` would
+# have carried it into a private — but still a — repository, and a GitHub token
+# cannot be un-leaked after the fact. On 27 August it was not ignored and sat
+# there untracked.
+keys/
+*.env
+!.env.example
+
+# Copies made before deliberately breaking the code to prove a check fails.
+# The mounted folder does not allow deleting them from the sandbox, so they
+# stay around — but they do not belong in the repository.
+*.bak
+
+# Python cache: machine-generated, unrelated to the project, and it used to
+# land in history and add noise to every commit that touched the tools.
+__pycache__/
+*.pyc
+node_modules/
+tools/sprites/legs/
+tools/sprites/steps.png

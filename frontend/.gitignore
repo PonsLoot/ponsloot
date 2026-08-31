@@ -1,0 +1,13 @@
+# Local Vercel link (per-machine)
+.vercel
+
+# Node
+node_modules/
+
+# Re-downloadable game audio (201 MB) — fetch with download-assets.* + assets-list.txt
+assets/music/
+
+# OS / editor cruft
+.DS_Store
+.fuse_hidden*
+Thumbs.db

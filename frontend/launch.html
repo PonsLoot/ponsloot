@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="loothood-api-origin" content="">
+  <title>PONSLOOT — Launch console</title>
+  <style>
+    /* Launch console.
+       ------------------------------------------------------------------
+       Everything needed to open a season, in one page, with no laptop and no
+       terminal. Publishing used to mean cloning the repository and running a
+       script with the admin token in a shell variable — a queue of ways to
+       lose twenty minutes on the one day nobody has twenty minutes.
+
+       Deliberately plain. This is a control panel, not a storefront: what
+       matters is that the person can see the current state at a glance and
+       that no button does something different from what it says.
+
+       The admin token lives in a field and in memory only. It is never
+       stored, because a token in localStorage on a page anyone can open is a
+       token that leaks the first time someone borrows the laptop. */
+    :root {
+      --bg: #0d1408; --line: #2a3a1e; --text: #eaf5ee; --muted: #8ba396;
+      --lime: #b7f24a; --ok: #7fdc5a; --bad: #e35f5f; --warn: #f0c04a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--text);
+      font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 15px; line-height: 1.5;
+    }
+    .wrap { max-width: 780px; margin: 0 auto; padding: 32px 20px 80px; }
+    h1 { font-size: 26px; margin: 0 0 4px; }
+    h2 { font-size: 16px; margin: 34px 0 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+    p.lede { color: var(--muted); margin: 0 0 24px; }
+    label { display: block; margin: 0 0 12px; }
+    label span { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    input, select {
+      width: 100%; padding: 10px 12px; background: #0a1006; color: var(--text);
+      border: 1px solid var(--line); border-radius: 8px; font: inherit;
+    }
+    input:focus, select:focus { outline: none; border-color: var(--lime); }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    button {
+      padding: 11px 18px; border: 1px solid var(--line); border-radius: 10px;
+      background: #16210f; color: var(--text); font: inherit; cursor: pointer;
+    }
+    button:hover { border-color: var(--lime); }
+    button.primary { background: var(--lime); color: #0a1006; border-color: var(--lime); font-weight: bold; }
+    button.danger { border-color: #6b2b2b; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+    .card { border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin: 0 0 16px; }
+    .out { white-space: pre-wrap; word-break: break-all; font-size: 13px; color: var(--muted); }
+    .ok { color: var(--ok); } .bad { color: var(--bad); } .warn { color: var(--warn); }
+    .checklist { list-style: none; margin: 0; padding: 0; }
+    .checklist li { display: flex; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+    .checklist li span:first-child { width: 16px; flex: none; }
+    code { background: #0a1006; padding: 1px 5px; border-radius: 4px; }
+    .hint { font-size: 12.5px; color: var(--muted); margin: 6px 0 0; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Launch console</h1>
+
+  <!-- THE ORDER OF OPERATIONS GOES FIRST, NOT LAST.
+       This console is opened once in the life of a project, on launch day, and
+       usually in a hurry. There are six sections, and without an order it is
+       not obvious that only two of them are required and the rest can be left
+       alone entirely. -->
+  <div class="card" style="border-color:#3a4a2a">
+    <p style="margin:0 0 8px"><strong>On launch day, in this order:</strong></p>
+    <p class="hint" style="margin:0">
+      1 · paste the admin token above &nbsp;→&nbsp;
+      2 · put the contract address in section 2 and press Save &nbsp;→&nbsp;
+      3 · press “Check now” in section 1 and read what is still red.
+    </p>
+    <p class="hint">
+      The address goes live the moment it is saved — no redeploy. It appears in
+      the game header next to Follow, with a copy button, and the payout pool
+      stops saying “token not launched”. Everything else on this page is
+      optional and can wait.
+    </p>
+  </div>
+
+  <div class="card">
+    <label><span>Admin token</span>
+      <input id="token" type="password" autocomplete="off" spellcheck="false" placeholder="from Railway → Variables → ADMIN_TOKEN">
+    </label>
+  </div>
+
+  <h2>1 · Readiness</h2>
+  <div class="card">
+    <ul class="checklist" id="checks"><li><span>•</span><span>Not checked yet</span></li></ul>
+    <div class="actions"><button id="refresh" type="button">Check now</button></div>
+  </div>
+
+  <h2>2 · Token address</h2>
+  <div class="card">
+    <label><span>Token contract address</span>
+      <input id="tokenAddr" placeholder="0x… — from the launchpad, on launch day" spellcheck="false"></label>
+    <div class="actions"><button id="saveChain" type="button">Save</button></div>
+    <p class="out" id="chainOut"></p>
+  </div>
+
+  <h2>3 · Season</h2>
+  <div class="card">
+    <div class="actions">
+      <button id="golive" class="primary" type="button">Start Season 1 · 14 days</button>
+    </div>
+    <p class="out" id="seasonOut"></p>
+  </div>
+
+  <h2>4 · Grant an entry ticket</h2>
+  <div class="card">
+    <label><span>Who — username or player id</span>
+      <input id="grantTo" placeholder="your username, or profile id from the account screen" spellcheck="false"></label>
+    <div class="actions">
+      <button id="grantTicket" type="button">Grant a ticket</button>
+      <button id="sweepGuests" type="button">Sweep empty guests</button>
+    </div>
+    <p class="out" id="grantOut"></p>
+  </div>
+
+  <h2>5 · Payments</h2>
+  <div class="card">
+    <div class="actions"><button id="paymentsRefresh" type="button">Show payments</button></div>
+    <p class="out" id="paymentsOut"></p>
+  </div>
+
+  <h2>6 · The Hunt gate</h2>
+  <div class="card">
+    <div class="actions">
+      <button id="gateClose" type="button">Close the Hunt</button>
+      <button id="gateOpen" class="primary" type="button">Open the Hunt</button>
+      <button id="gateRefresh" type="button">Refresh</button>
+    </div>
+    <p class="out" id="gateOut">Checking the gate…</p>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const $ = (id) => document.getElementById(id);
+  const api = (path) => (document.querySelector('meta[name="loothood-api-origin"]')?.content || "") + path;
+
+  function token() {
+    const value = $("token").value.trim();
+    if (!value) throw new Error("Admin token is empty.");
+    return value;
+  }
+
+  async function call(path, options = {}) {
+    const response = await fetch(api(path), {
+      ...options,
+      headers: {
+        "content-type": "application/json",
+        "x-loothood-admin": token(),
+        ...(options.headers || {}),
+      },
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(payload?.error?.message || payload?.message || `HTTP ${response.status}`);
+    }
+    return payload;
+  }
+
+  /* ---- the token address ----------------------------------------------------
+
+     These two functions were referenced at the bottom of this file and never
+     written. That is worse than it sounds: the reference itself throws while
+     the script is still loading, so every line after it never ran — including
+     the one that wires up the button that opens the season. The page looked
+     finished and the most important button on it did nothing at all.
+
+     Syntax checks did not catch it, because the syntax was fine. Only clicking
+     the buttons catches this, which is what the DOM check now does.
+
+     The address is saved on the server, not in this browser: the watcher on
+     the server is what needs it, and a value living only in this tab would
+     vanish with the tab. */
+  async function showChain() {
+    const out = $("chainOut");
+    if (!$("token").value.trim()) { out.textContent = ""; return; }
+    try {
+      const data = await call("/api/v1/admin/chain");
+      const line = (name, part) => `${name}: ${part.masked || "NOT SET"}`
+        + (part.fromEnv ? " (from Railway variables — those win over this page)" : "")
+        + (part.updatedAt ? ` · saved ${new Date(part.updatedAt).toLocaleString()}` : "");
+      out.innerHTML = `<span class="${data.token.masked ? "ok" : "warn"}">${line("Token", data.token)}</span>`
+        + `\n<span class="${data.treasury.masked ? "ok" : "bad"}">${line("Treasury", data.treasury)}</span>`;
+    } catch (error) {
+      out.textContent = `Could not read: ${error.message}`;
+      out.className = "out bad";
+    }
+  }
+
+  async function saveChain() {
+    const out = $("chainOut");
+    const value = $("tokenAddr").value.trim();
+    if (!value) { out.textContent = "Paste the token address first."; out.className = "out bad"; return; }
+    out.textContent = "Saving…";
+    out.className = "out";
+    try {
+      await call("/api/v1/admin/chain", {
+        method: "POST",
+        body: JSON.stringify({ tokenAddress: value }),
+      });
+      // Read it back rather than reporting success from our own request: what
+      // matters is what the server now holds, and an env variable already set
+      // in Railway would quietly override what was just typed here.
+      await showChain();
+      void refresh();
+    } catch (error) {
+      out.textContent = `Failed: ${error.message}`;
+      out.className = "out bad";
+    }
+  }
+
+  // ---- granting a ticket ----------------------------------------------------
+  //
+  // The season key is fixed rather than typed: there is one season, and a typo
+  // in its key would grant a ticket to a season that does not exist — and the
+  // server would answer 200, because writing a row for an unknown season is
+  // not an error in itself.
+  async function grantTicket() {
+    const out = $("grantOut");
+    const target = $("grantTo").value.trim();
+    if (!target) {
+      out.textContent = "Enter a username or a player id.";
+      out.className = "out bad";
+      return;
+    }
+    out.textContent = "Granting…";
+    out.className = "out";
+    try {
+      const result = await call("/api/v1/admin/seasons/loothood-s1/entry", {
+        method: "POST",
+        body: JSON.stringify({ target }),
+      });
+      out.innerHTML = `<span class="ok">Ticket granted to ${target}.</span>`
+        + `\nstatus: ${result?.entry?.status || "purchased"}`
+        + "\n\nThe Season Hunt is available from the Season Centre now.";
+      out.className = "out";
+    } catch (error) {
+      // "No such account" is the usual answer here, and it is worth naming:
+      // the id is taken from the account screen, not invented.
+      out.textContent = `Failed: ${error.message}`;
+      out.className = "out bad";
+    }
+  }
+
+  // ---- payments -------------------------------------------------------------
+  //
+  // Shown on demand rather than polled: this is a page opened when something
+  // needs answering, not a dashboard to leave running.
+  async function showPayments() {
+    const out = $("paymentsOut");
+    out.textContent = "Reading…";
+    out.className = "out";
+    try {
+      const data = await call("/api/v1/admin/payments?limit=25");
+      if (!data.payments.length) {
+        out.textContent = "No transfers to the treasury yet.";
+        return;
+      }
+      const lines = data.payments.map((p) => {
+        const who = p.player ? `${p.player} (${p.playerId})` : p.from;
+        return p.credited
+          ? `✔ ${p.amountTokens} · ${who}`
+          : `✘ ${p.amountTokens} · ${p.from}\n     ${p.reason}`;
+      });
+      out.textContent = `ticket price: ${data.ticketPriceTokens} tokens\n\n${lines.join("\n")}`;
+    } catch (error) {
+      out.textContent = `Failed: ${error.message}`;
+      out.className = "out bad";
+    }
+  }
+
+  // ---- the Hunt gate --------------------------------------------------------
+  //
+  // Status is read from the public endpoint: what this card shows is exactly
+  // what the game itself sees, token or no token.
+  async function gateRefresh() {
+    const out = $("gateOut");
+    try {
+      const r = await fetch(api("/api/v1/gate")).then((x) => x.json());
+      out.innerHTML = r.huntsOpen
+        ? '<span class="ok">Hunts are OPEN.</span>'
+        : `<span class="bad">Hunts are CLOSED.</span>${r.message ? "\n" + r.message : ""}`;
+    } catch (e) { out.innerHTML = `<span class="bad">${e.message}</span>`; }
+  }
+  async function gateSet(open) {
+    const out = $("gateOut");
+    out.textContent = open ? "Opening…" : "Closing…";
+    try {
+      await call("/api/v1/admin/gate", {
+        method: "POST",
+        body: JSON.stringify({ open, message: "The Hunt opens at launch." }),
+      });
+      await gateRefresh();
+    } catch (e) { out.innerHTML = `<span class="bad">${e.message}</span>`; }
+  }
+  $("gateOpen").addEventListener("click", () => gateSet(true));
+  $("gateClose").addEventListener("click", () => {
+    if (confirm("Close the Hunt for every player?")) gateSet(false);
+  });
+  $("grantTicket").addEventListener("click", grantTicket);
+  $("paymentsRefresh").addEventListener("click", showPayments);
+  $("gateRefresh").addEventListener("click", gateRefresh);
+  gateRefresh();
+
+  // ---- readiness ------------------------------------------------------------
+  //
+  // Reads the same measured status the game shows, and adds the two things the
+  // status endpoint cannot know: whether a price has been set and whether the
+  // season exists yet. A checklist that only repeats "ok" would be decoration.
+  async function refresh() {
+    const list = $("checks");
+    list.innerHTML = '<li><span>•</span><span>Checking…</span></li>';
+    const rows = [];
+    try {
+      const health = await fetch(api("/api/v1/health/systems")).then((r) => r.json());
+      for (const system of health.systems || []) {
+        const good = system.state === "up";
+        const idle = system.state === "idle";
+        rows.push([good ? "ok" : idle ? "idle" : "bad", `${system.name}: ${system.detail || system.state}`]);
+      }
+    } catch (error) {
+      rows.push(["bad", `Status unavailable: ${error.message}`]);
+    }
+    list.innerHTML = rows.map(([state, text]) => `
+      <li><span class="${state === "ok" ? "ok" : state === "bad" ? "bad" : "warn"}">${
+        state === "ok" ? "✔" : state === "bad" ? "✘" : "•"}</span><span>${text}</span></li>`).join("");
+  }
+
+  // ---- price ----------------------------------------------------------------
+  // Amounts are entered in WETH and converted to the smallest unit here.
+  // Eighteen decimals do not survive a float, so the conversion goes through
+  // the decimal string rather than through multiplication.
+  function toWei(value) {
+    const text = String(value ?? "").trim();
+    if (!text || Number(text) <= 0) return 0n;
+    const [whole, fraction = ""] = text.split(".");
+    const padded = (fraction + "0".repeat(18)).slice(0, 18);
+    return BigInt(whole || "0") * 10n ** 18n + BigInt(padded || "0");
+  }
+
+  // ---- season ---------------------------------------------------------------
+  //
+  // The whole form used to live here: key, title, dates, prices, prizes,
+  // draft/live. Launch day needs none of that flexibility - it needs one
+  // button that cannot be filled in wrong. The layout is fixed: fourteen
+  // days from the moment of the click, the standard prize split, free entry.
+  async function launch() {
+    const out = $("seasonOut");
+    out.className = "out";
+    out.textContent = "Opening…";
+    try {
+      const now = new Date();
+      const ends = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+      const result = await call("/api/v1/admin/seasons/launch", {
+        method: "POST",
+        body: JSON.stringify({
+          seasonKey: "loothood-s1",
+          title: "Season One — The Forest Opens",
+          state: "live",
+          priceUsd: 5,
+          // Sent alongside the dollars: the server uses it only when no market
+          // price exists, so the launch does not hang on an exchange.
+          // A fallback price for the first minutes of trading, while no index
+          // knows the pair yet: 250,000 tokens is five dollars at a valuation of
+          // twenty thousand per billion tokens. As soon as a quote appears, the
+          // five-dollar ceiling kicks in by itself and brings the price down.
+          priceWei: toWei("250000").toString(),
+          prizeWei: ["0.1", "0.05", "0.025"].map((v) => toWei(v).toString()),
+          startsAt: now.toISOString(),
+          endsAt: ends.toISOString(),
+        }),
+      });
+      /* A season that opened free is worse than one that did not open.
+         ------------------------------------------------------------------
+         The price is computed on the server: this page sends dollars, the
+         server converts them at the rate it fetches itself. If the server is
+         older than this page it does not know that field, quietly falls back
+         to zero, and the season goes live with free entry — announced as paid.
+
+         Nobody would notice from here: the request succeeds, the season is
+         open, the console says so. So the answer is checked, and a season
+         that came back priced at zero is put straight back into draft rather
+         than left running. */
+      const priced = String(result?.entry?.priceWei || "0");
+      if (!/^[1-9]/.test(priced)) {
+        try {
+          await call(`/api/v1/admin/seasons/${encodeURIComponent("loothood-s1")}/state`, {
+            method: "POST",
+            body: JSON.stringify({ state: "draft" }),
+          });
+        } catch { /* showing the reason beats rolling back in silence */ }
+        out.innerHTML = '<span class="bad">STOPPED: the season came back with a ticket price of 0'
+          + ' and has been put back into draft.</span>'
+          + '\n\nThe server did not price the ticket — it is most likely older than this page'
+          + ' and does not know how to convert dollars itself.'
+          + '\nDeploy the current backend, then try again.';
+        out.className = "out bad";
+        return;
+      }
+      out.innerHTML = `<span class="ok">Season is open until ${ends.toUTCString()}.</span>`
+        + `\n\nFINGERPRINT — announce this:\n${result.manifestHash}`
+        + `\n\nstages: ${result.stageCount} · bosses: ${(result.bossOrder || []).join(" → ")}`
+        + `\nticket: ${result.entry.priceWei} wei ($5 at ${result.tokenUsd} USD/token) · prize: ${result.prize.publishedWethWei} wei`;
+      // A live season with a shut gate is a paradox nobody needs on launch
+      // day, so the button also OPENS the Hunt. Only opens - closing stays
+      // a deliberate, separate press in the gate card below.
+      void gateSet(true);
+      void refresh();
+    } catch (error) {
+      out.textContent = `Failed: ${error.message}`;
+      out.className = "out bad";
+    }
+  }
+
+  /* Sweeping out empty guest accounts.
+     The first press only counts, the second deletes: seeing the number before
+     the deletion is worth more than one extra click. */
+  let sweepCounted = 0;
+  async function sweepGuests() {
+    const out = $("grantOut");
+    out.className = "out";
+    out.textContent = sweepCounted ? "Deleting…" : "Counting…";
+    try {
+      const result = await call("/api/v1/admin/accounts/purge-empty-guests", {
+        method: "POST",
+        body: JSON.stringify({ olderThanMinutes: 30, apply: sweepCounted > 0 }),
+      });
+      if (result.dryRun) {
+        sweepCounted = result.candidates;
+        out.innerHTML = result.candidates
+          ? `<span class="warn">${result.candidates} empty guests older than 30 min.</span>`
+            + "\nPress again to delete them."
+          : '<span class="ok">Nothing to sweep.</span>';
+      } else {
+        sweepCounted = 0;
+        out.innerHTML = `<span class="ok">Deleted ${result.deleted}.</span>`
+          + `\nAccounts left: ${result.accountsLeft}`;
+      }
+    } catch (error) {
+      sweepCounted = 0;
+      out.textContent = `Failed: ${error.message}`;
+      out.className = "out bad";
+    }
+  }
+  $("sweepGuests").addEventListener("click", sweepGuests);
+  $("saveChain").addEventListener("click", saveChain);
+  $("token").addEventListener("change", () => void showChain());
+  $("refresh").addEventListener("click", refresh);
+  $("golive").addEventListener("click", () => {
+    // Opening a season is the irreversible half of this page: once it is
+    // live, the clock runs. Worth one deliberate pause.
+    if (confirm("Start Season 1 for 14 days from this moment?")) launch();
+  });
+
+  void refresh();
+  void showChain();
+})();
+</script>
+</body>
+</html>

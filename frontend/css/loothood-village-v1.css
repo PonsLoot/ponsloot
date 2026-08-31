@@ -1,0 +1,1229 @@
+/* PONSLOOT — Village v1 · "Camp"
+   ------------------------------------------------------------------
+   The base screen. What was wrong:
+     — the "Accumulated Bonuses" panel was the only thing in the whole
+       game made of light paper, while the values on it were painted in
+       brand lime: a contrast of 1.6:1, impossible to read. That is
+       already fixed in loothood-patch-v1.css; here we finish the rest;
+     — three different button styles on one screen with no hierarchy: a
+       dark outline, a lime outline and filled lime — all three meant
+       different levels of importance but looked equally arbitrary;
+     — the headings of three panels were gold, even though on Hunt every
+       heading is ivory;
+     — panels without radii or shared surfaces.
+
+   Scoped to .hb-app. */
+
+/* ============ HEADINGS ============ */
+
+.hb-app .hb-settlement-overview h1,
+.hb-app .hb-settlement-bonuses h2,
+.hb-app .hb-settlement-passive h2,
+.hb-app .hb-settlement-operations h2,
+.hb-app .hb-settlement-dashboard h2,
+.hb-app .hb-settlement-dashboard h3 {
+  color: var(--ivory) !important;
+  font-family: var(--disp);
+  letter-spacing: .3px;
+}
+.hb-app .hb-settlement-overview .hb-diamond-rule,
+.hb-app .hb-settlement-dashboard .hb-diamond-rule { display: none !important; }
+
+/* ============ PANELS ============ */
+
+.hb-app .hb-settlement-bonuses,
+.hb-app .hb-settlement-passive,
+.hb-app .hb-settlement-operations {
+  border: 1px solid var(--line) !important;
+  border-radius: var(--r) !important;
+  background: var(--surface) !important;
+  padding: 18px 20px !important;
+}
+.hb-app .hb-settlement-dashboard { gap: 14px !important; }
+
+/* The summary at the top — rows like the bounties on Hunt: a hairline and the
+   value on the right, no boxes. */
+.hb-app .hb-settlement-status > * {
+  border-top: 1px solid var(--line2) !important;
+  border-bottom: none !important;
+  background: none !important;
+  padding: 11px 0 !important;
+}
+
+/* ============ BUTTON HIERARCHY ============
+   One rule per screen: only the path the screen is inviting you to take right
+   now is filled lime — collecting what has accumulated. Everything else is dark
+   with an outline. Upgrades get a gold outline because they cost resources and
+   are a spend rather than a gain. */
+
+.hb-app .hb-settlement-operations button,
+.hb-app .hb-ledger-button {
+  min-height: 44px;
+  border-radius: 11px !important;
+  border: 1px solid var(--line) !important;
+  background: var(--surface2) !important;
+  color: var(--ivory) !important;
+  font-family: var(--disp);
+  font-size: 16px;
+  letter-spacing: .3px;
+  cursor: pointer;
+  transition: border-color 140ms var(--lh-ease-out),
+              background 140ms var(--lh-ease-out),
+              transform 120ms var(--lh-ease-out);
+}
+
+/* The screen's only lime CTA. */
+.hb-app .hb-ledger-button.is-primary {
+  border: none !important;
+  color: #08120a !important;
+  background: linear-gradient(180deg, #c8f85e, var(--lime) 42%, var(--lime-deep)) !important;
+  box-shadow: 0 12px 26px -14px color-mix(in srgb, var(--lime) 70%, transparent),
+              inset 0 1px 0 rgba(255,255,255,.4) !important;
+}
+
+/* Spends get a gold outline: the colour of expenditure, not of income. */
+.hb-app .hb-settlement-operations .hb-operation-row button {
+  border-color: color-mix(in srgb, var(--leg) 34%, var(--line)) !important;
+  color: var(--leg) !important;
+  font-size: 14.5px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hb-app .hb-ledger-button:hover,
+  .hb-app .hb-settlement-operations button:hover {
+    border-color: color-mix(in srgb, var(--lime) 45%, var(--line)) !important;
+    background: var(--surface3) !important;
+  }
+  .hb-app .hb-ledger-button.is-primary:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+    background: linear-gradient(180deg, #c8f85e, var(--lime) 42%, var(--lime-deep)) !important;
+  }
+  .hb-app .hb-settlement-operations .hb-operation-row button:hover {
+    border-color: color-mix(in srgb, var(--leg) 60%, var(--line)) !important;
+    background: color-mix(in srgb, var(--leg) 10%, var(--surface2)) !important;
+  }
+}
+
+/* ============ PASSIVE RESOURCES ============ */
+
+.hb-app .hb-passive-resource {
+  border-top: 1px solid var(--line2) !important;
+  border-bottom: none !important;
+  padding: 12px 0 !important;
+}
+.hb-app .hb-passive-resource img {
+  image-rendering: pixelated;
+}
+.hb-app .hb-passive-resource span { color: var(--ivory) !important; }
+.hb-app .hb-passive-resource strong { color: var(--lime) !important; }
+.hb-app .hb-passive-resource small { color: var(--dim) !important; }
+.hb-app .hb-passive-note {
+  color: var(--dim) !important;
+  text-transform: none !important;
+  letter-spacing: .2px !important;
+  font-size: 12.5px;
+}
+
+/* ============ OPERATIONS AND LAND ============ */
+
+.hb-app .hb-operation-advancement {
+  border: 1px solid var(--line2) !important;
+  border-radius: 11px !important;
+  background: var(--surface2) !important;
+  padding: 12px 14px !important;
+}
+.hb-app .hb-operation-row {
+  border-top: 1px solid var(--line2) !important;
+  padding: 12px 0 !important;
+}
+.hb-app .hb-operation-row strong { color: var(--ivory) !important; }
+
+/* The unlocked land bar — the same gradient track as everywhere else: the Hunt
+   weekly bar, pity, bounties. */
+.hb-app .hb-land-progress__track {
+  height: 9px !important;
+  border: 1px solid var(--line2) !important;
+  border-radius: 5px !important;
+  background: var(--surface3) !important;
+  overflow: hidden;
+}
+.hb-app .hb-land-progress__track > * {
+  border-radius: 5px !important;
+  background: linear-gradient(90deg, var(--emerald), var(--lime)) !important;
+  box-shadow: 0 0 10px -2px color-mix(in srgb, var(--lime) 70%, transparent) !important;
+}
+
+/* The right panel ran off the edge: the increased padding was added on top of a
+   width that legacy specifies in container units. We put the bounds back where
+   they belong. */
+.hb-app .hb-settlement-dashboard > * {
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.hb-app .hb-settlement-operations {
+  padding: 16px 16px 18px !important;
+}
+.hb-app .hb-operation-row {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+.hb-app .hb-operation-row button {
+  white-space: nowrap;
+  padding: 9px 13px !important;
+}
+.hb-app .hb-operation-advancement {
+  display: grid;
+  gap: 4px;
+}
+.hb-app .hb-operation-advancement > * { min-width: 0; }
+
+/* The panel grid itself is specified by legacy in container units and is wider
+   than the available width — the third column ran off screen together with
+   "0 OWNED" and its button. Three equal columns based on the actual width. */
+.hb-app .hb-settlement-dashboard {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+}
+.hb-app .hb-settlement-overview,
+.hb-app .hb-settlement-hero { max-width: 100%; box-sizing: border-box; }
+
+/* ============ SHORT WINDOW ============
+   Here I first went squeezing the village padding so that the Claim Resources
+   button would stop being clipped by the bottom edge. The padding had nothing to
+   do with it: the shell body computed the header height as a fraction of the
+   window instead of its real 72 pixels and on a short window overflowed the edge
+   entirely, on every screen at once. Fixed in loothood-hunt-v1.css; there is
+   nothing to fix here.
+
+   I do keep a little of the extra density: at 768 the village fits only just. */
+@media (max-height: 820px) {
+  .hb-app .hb-settlement-dashboard { gap: 10px !important; }
+  .hb-app .hb-settlement-operations { padding: 11px 14px 12px !important; }
+}
+
+/* Hold panel.
+ *
+ * Sits ABOVE the list of plots, because it explains why there are exactly as
+ * many plots as there are. Below the list it would be read only after the
+ * wrong conclusion had already been drawn from an empty grid.
+ */
+.holdings-panel {
+  border: 1px solid rgba(183, 242, 74, .22);
+  border-radius: 4px;
+  background: rgba(10, 18, 14, .72);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+
+.holdings-panel__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.holdings-panel__head h2 {
+  font-family: 'Alagard', serif;
+  font-size: 19px;
+  margin: 0;
+  color: var(--ivory, #eaf5ee);
+  letter-spacing: .04em;
+}
+
+.holdings-panel__tier {
+  font-family: 'Alagard', serif;
+  font-size: 17px;
+  color: var(--lime, #b7f24a);
+}
+
+.holdings-panel__state {
+  margin: 7px 0 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(234, 245, 238, .74);
+}
+
+.holdings-panel__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin: 0 0 12px;
+}
+
+.holdings-panel__facts div { min-width: 84px; }
+.holdings-panel__facts dt {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: rgba(234, 245, 238, .5);
+  margin: 0 0 3px;
+}
+.holdings-panel__facts dd {
+  margin: 0;
+  font-family: 'Alagard', serif;
+  font-size: 18px;
+  color: var(--lime, #b7f24a);
+}
+
+.holdings-panel__ladder {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  border-top: 1px solid rgba(255, 255, 255, .07);
+}
+
+.holdings-panel__ladder li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 12px;
+  align-items: baseline;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, .06);
+  font-size: 13px;
+  /* Thresholds not yet reached are dimmed, but NOT hidden: someone deciding
+     whether to buy the token comes here to look at exactly these. */
+  color: rgba(234, 245, 238, .44);
+}
+
+.holdings-panel__ladder li.is-reached { color: var(--lime, #b7f24a); }
+.holdings-panel__ladder-name { font-family: 'Alagard', serif; font-size: 15px; }
+.holdings-panel__ladder-hold { font-variant-numeric: tabular-nums; }
+.holdings-panel__ladder-gain { font-size: 12px; opacity: .8; }
+
+.holdings-panel__note {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(234, 245, 238, .44);
+}
+
+@media (max-width: 640px) {
+  .holdings-panel__ladder li { grid-template-columns: 1fr auto; }
+  .holdings-panel__ladder-gain { grid-column: 2; }
+}
+
+/* Launch fund and the number of linked wallets.
+ *
+ * Boxed in a border, because these are the only two lines on the screen that
+ * honestly make entering early more profitable: real extra money in the pool
+ * and a small number of participants. Everything else on this screen is
+ * rules; this is a reason.
+ */
+.holdings-panel__launch {
+  border: 1px solid rgba(43, 226, 138, .3);
+  border-radius: 3px;
+  background: rgba(43, 226, 138, .06);
+  padding: 9px 11px;
+  margin: 0 0 10px;
+}
+.holdings-panel__launch p { margin: 0 0 6px; font-size: 12px; line-height: 1.5; color: rgba(234, 245, 238, .78); }
+.holdings-panel__launch p:last-child { margin-bottom: 0; }
+.holdings-panel__launch strong { color: var(--emerald, #2be28a); font-weight: 600; }
+
+/* Desktop layout of the buildings and pulls screens.
+ *
+ * THIS WAS THE MOST EXPENSIVE BREAKAGE OF THE WEEK: both screens looked
+ * empty. A heading, one line — and a black field down to the bottom. It
+ * looked like "nothing was done", even though everything had been done.
+ *
+ * The cause: the base `.hb-main` in main-menu-foundation-v1.css is a grid of
+ * exactly TWO rows (56.6% / 43.4%), cut to fit the hunt screen: picture on
+ * top, panel below. Buildings has five children, pulls has four. The third
+ * and every one after it got rows beyond those declared and slid past the
+ * bottom edge, and `.hb-main` has no scrolling on desktop — only the mobile
+ * branch does. The ownership panel, the pull buttons and the whole card grid
+ * were sitting at y≈1300–2000 with a window height of 932. The node exists,
+ * it is not hidden, there are no console errors — and it is invisible.
+ *
+ * So what happens here is not "the padding was fixed", it is the grid itself
+ * being removed: a column that does not depend on the number of children and
+ * knows how to scroll. `flex: 0 0 auto` on the children is mandatory —
+ * otherwise the column squeezes the cards to fit the height, and instead of
+ * an empty bottom we get a flattened top.
+ *
+ * `.hb-screen-heading` takes `height: 20%` in the base (that is ~487px in a
+ * full window) — a share of a grid row, which makes sense only on hunt. On
+ * column screens the heading must be as tall as itself, exactly as is already
+ * done for the market, the equipment and the settlement.
+ *
+ * The rule is locked into a desktop media query on purpose: the mobile branch
+ * in main-menu-mobile-transpose-v3.css already makes `.hb-main` a scrolling
+ * block, and it loads BEFORE this file — without the media condition we would
+ * have overridden it.
+ */
+@media (hover: hover) and (pointer: fine) and (min-width: 900px) {
+  .hb-main.hb-buildings-screen,
+  .hb-main.hb-pulls-screen {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px 20px 28px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .hb-main.hb-buildings-screen > *,
+  .hb-main.hb-pulls-screen > * { flex: 0 0 auto; }
+  .hb-main.hb-buildings-screen > .hb-screen-heading,
+  .hb-main.hb-pulls-screen > .hb-screen-heading { height: auto; min-height: 0; }
+}
+
+/* The pool and the share are the first thing seen on the buildings screen.
+ *
+ * They are styled more prominently than the rest on purpose. They are the
+ * answer to the question "why", and everything else on the screen answers
+ * "how"; when they look the same, a person reads top to bottom and never
+ * reaches the "why", because they quit before that.
+ *
+ * A pending source is dimmed, but NOT hidden. Hidden looks like absent:
+ * remove the "Pons creator fee" line and a scheme of three sources becomes a
+ * scheme of one, whereas the player must see the whole construction,
+ * including the part that is not switched on yet.
+ */
+.hb-pool,
+.hb-share {
+  padding: 12px 14px;
+  margin: 0 0 12px;
+  border: 1px solid rgba(183, 242, 74, .28);
+  border-radius: 6px;
+  background: rgba(10, 24, 14, .72);
+}
+.hb-pool-head,
+.hb-share h3,
+.hb-pool h3 { margin: 0; }
+.hb-pool-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.hb-pool-total,
+.hb-share-money {
+  font-family: 'Alagard', serif;
+  color: var(--lime, #b7f24a);
+}
+.hb-pool-total small,
+.hb-share-money small { color: rgba(234, 245, 238, .5); }
+.hb-pool-list { margin: 0; }
+.hb-pool-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 3px 0;
+  border-top: 1px solid rgba(255, 255, 255, .07);
+}
+.hb-pool-row dt { color: rgba(234, 245, 238, .82); }
+/* A source's rate goes on a second line under its name.
+   "$0" next to a source reads as "there is no source". The rate beside it
+   says the source is set up and simply has not started earning yet — and
+   that is different news. */
+.hb-pool-rate {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  line-height: 1.3;
+  color: rgba(234, 245, 238, .5);
+}
+.hb-pool-row dd { margin: 0; }
+.hb-pool-row.is-waiting dt { color: rgba(234, 245, 238, .45); }
+.hb-pool-wait { color: rgba(234, 245, 238, .45); }
+.hb-pool-note { margin: 8px 0 0; color: rgba(234, 245, 238, .5); }
+
+.hb-share-money { display: block; margin: 4px 0 2px; }
+.hb-share-formula { margin: 0; color: rgba(234, 245, 238, .62); }
+.hb-share-note { margin: 4px 0 0; color: rgba(234, 245, 238, .5); }
+.hb-share.is-empty p { margin: 4px 0 0; color: rgba(234, 245, 238, .72); }
+
+/* Income that is not being paid yet is dimmed — but stays a number in its
+   own place, so the cards do not jump once the pool fills up. */
+.hb-bc__income.is-idle { color: rgba(234, 245, 238, .45); font-weight: 400; }
+
+/* The bottom half of the hunt screen.
+ *
+ * Lives inside .hb-dashboard — that is the second row of the .hb-main grid,
+ * it has a height of its own, and there is no need to lay it out across the
+ * whole page. Its own scrolling: a chain of three steps does not fit into a
+ * short window, and .hb-main does not scroll on the hunt screen (and must not
+ * — the top half there is a picture).
+ */
+/* We address it by id, not by .hb-dashboard: the bottom half carries that
+ * class on other screens too, and there it is already a TWO-column grid — for
+ * two panels that hunt no longer has. The chain landed in the first column
+ * and lived in 706 pixels out of 1430, while the second column stood empty.
+ * Measured, not spotted by eye: in a screenshot it just looked "a bit
+ * narrow". */
+#huntWhy {
+  min-height: 0;
+  padding: 14px 18px 18px;
+  grid-template-columns: 1fr;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.hb-why-title { margin: 0 0 10px; color: var(--hb-gold-bright, #f0c65a); }
+/* Three steps in a ROW, not in a column.
+ *
+ * As a column they took up a third of the width and did not fit into the
+ * height allotted: the third step — the one with the money in it — slid below
+ * the bottom edge, and the chain lost its end. A chain whose end you cannot
+ * see explains nothing: its whole point is that all three steps are visible
+ * at once and the link between them reads without scrolling. Meanwhile half
+ * the screen stood empty on the right. */
+.hb-why-chain {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 8px;
+}
+.hb-why-step {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-left-width: 3px;
+  border-left-color: rgba(255, 255, 255, .12);
+  border-radius: 5px;
+  background: rgba(10, 24, 14, .6);
+}
+/* Color carries state, it does not decorate: a step already done recedes into
+   shadow, the next one glows, a future one stands grey. Without this, three
+   identical cards are a list, not a direction. */
+.hb-why-step.is-done { border-left-color: var(--emerald, #2be28a); opacity: .62; }
+.hb-why-step.is-next { border-left-color: var(--lime, #b7f24a); background: rgba(18, 38, 18, .8); }
+.hb-why-step.is-later { opacity: .5; }
+.hb-why-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 4px;
+  font-family: 'Alagard', serif;
+  color: var(--lime, #b7f24a);
+}
+.hb-why-body { min-width: 0; }
+.hb-why-body h3 { margin: 0 0 2px; color: var(--ivory, #eaf5ee); }
+.hb-why-body p { margin: 0 0 8px; color: rgba(234, 245, 238, .68); }
+.hb-why-body .hb-ledger-button { min-width: 132px; }
+/* The button of a future step is visible, but does not pull the eye into a
+   click: it is not disabled — you can always go and look at that section — it
+   simply does not call you there ahead of time. */
+.hb-why-step.is-later .hb-ledger-button,
+.hb-why-step.is-done .hb-ledger-button { opacity: .8; }
+
+.hb-why-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin: 0 0 10px; }
+.hb-why-facts div {
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 5px;
+  background: rgba(10, 24, 14, .6);
+}
+.hb-why-facts dt { color: rgba(234, 245, 238, .55); }
+.hb-why-facts dd { margin: 2px 0 0; color: var(--ivory, #eaf5ee); }
+.hb-why-money { color: var(--lime, #b7f24a); font-family: 'Alagard', serif; }
+.hb-why-facts small,
+.hb-why-money small { color: rgba(234, 245, 238, .5); }
+.hb-why-note { margin: 0 0 8px; color: rgba(234, 245, 238, .55); }
+
+/* The buildings screen.
+ *
+ * The card shows the whole bundle: the building, the coin, the rarity, the
+ * power, the income. This used to be spread across three places plus your
+ * head.
+ */
+.hb-buildings-lede,
+.hb-buildings-note {
+  margin: 0 0 14px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(234, 245, 238, .72);
+  max-width: 68ch;
+}
+.hb-buildings-note { margin: 14px 0 0; color: rgba(234, 245, 238, .5); }
+
+.hb-building-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.hb-building-card {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  border: 1px solid var(--hb-panel-border, rgba(255,255,255,.1));
+  border-left-width: 3px;
+  border-radius: 4px;
+  background: rgba(10, 18, 14, .66);
+  padding: 11px 13px;
+}
+
+/* Rarity reads off the left edge. The colors are the same as for equipment:
+   the player already knows purple beats blue and does not need a second
+   language of rarity. */
+.hb-building-card[data-rarity="common"]    { border-left-color: #8ea89b; }
+.hb-building-card[data-rarity="rare"]      { border-left-color: #46d8e0; }
+.hb-building-card[data-rarity="epic"]      { border-left-color: #b48cff; }
+.hb-building-card[data-rarity="legendary"] { border-left-color: #ffb648; }
+
+/* The sheet is two frames side by side; we take the left one, the base form.
+   The same technique as in .plot__building-art, so the building looks
+   identical on both screens. */
+.hb-building-card__art {
+  flex: 0 0 74px;
+  aspect-ratio: 8 / 9;
+  background-image: var(--building-art);
+  background-position: left center;
+  background-repeat: no-repeat;
+  background-size: 200% 100%;
+  image-rendering: pixelated;
+}
+
+.hb-building-card__body { min-width: 0; flex: 1; }
+.hb-building-card h3 {
+  font-family: 'Alagard', serif;
+  font-size: 16px;
+  margin: 0 0 5px;
+  color: var(--ivory, #eaf5ee);
+}
+
+/* A chip with the ticker instead of someone else's logo: the logo would have
+   to be either taken or imitated — the first is not ours to take, the second
+   is a forgery. */
+.hb-coin-chip {
+  display: inline-block;
+  font-family: 'Alagard', serif;
+  font-size: 12px;
+  letter-spacing: .06em;
+  padding: 2px 7px;
+  border: 1px solid rgba(183, 242, 74, .38);
+  border-radius: 2px;
+  color: var(--lime, #b7f24a);
+  margin-bottom: 7px;
+}
+
+.hb-building-card dl { display: flex; flex-wrap: wrap; gap: 10px; margin: 0; }
+.hb-building-card dt {
+  font-size: 10px; text-transform: uppercase; letter-spacing: .09em;
+  color: rgba(234, 245, 238, .45); margin: 0 0 2px;
+}
+.hb-building-card dd { margin: 0; font-size: 13px; color: rgba(234, 245, 238, .82); }
+.hb-building-card dd.hb-value { color: var(--lime, #b7f24a); font-variant-numeric: tabular-nums; }
+
+/* Pulls and building ownership. */
+.hb-pull-panel {
+  display: block;
+  border: 1px solid rgba(183, 242, 74, .22);
+  border-radius: 4px;
+  background: rgba(10, 18, 14, .72);
+  padding: 13px 15px;
+  margin: 0 0 14px;
+}
+.hb-pull-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.hb-pull-head h3 { font-family: 'Alagard', serif; font-size: 18px; margin: 0; color: var(--ivory, #eaf5ee); }
+.hb-pull-count { font-size: 12px; color: var(--lime, #b7f24a); }
+.hb-pull-state { margin: 7px 0 10px; font-size: 13px; line-height: 1.5; color: rgba(234, 245, 238, .74); }
+.hb-pull-note { margin: 9px 0 0; font-size: 12px; color: rgba(234, 245, 238, .45); }
+.hb-pull-facts { display: flex; flex-wrap: wrap; gap: 18px; margin: 0 0 11px; }
+.hb-pull-facts dt { font-size: 10px; text-transform: uppercase; letter-spacing: .09em;
+                    color: rgba(234, 245, 238, .45); margin: 0 0 2px; }
+.hb-pull-facts dd { margin: 0; font-family: 'Alagard', serif; font-size: 17px; color: var(--lime, #b7f24a); }
+
+/* Idle buildings are dimmed but still shown: a building that disappears reads
+   as one taken away, and it has not gone anywhere — there simply was not a
+   free slot. */
+.hb-pull-owned { list-style: none; margin: 0 0 12px; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.hb-pull-owned li {
+  font-size: 12px; padding: 3px 8px; border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, .1); color: rgba(234, 245, 238, .5);
+}
+.hb-pull-owned li.is-active { color: var(--lime, #b7f24a); border-color: rgba(183, 242, 74, .38); }
+.hb-pull-owned li.is-empty { border-style: dashed; }
+.hb-pull-owned small { opacity: .7; }
+.hb-pull-actions { display: flex; gap: 9px; flex-wrap: wrap; }
+
+/* The coin card in the corner of the building.
+ *
+ * Modelled on the 6PACK cards: a real icon plus the ticker. The ticker sits
+ * UNDER the picture, not instead of it: one day an address on someone else's
+ * CDN will stop responding, and what is left in its place must be readable
+ * text, not an empty hole.
+ */
+.hb-building-card__artwrap,
+.hb-drop-card__artwrap { position: relative; flex: 0 0 74px; }
+.hb-drop-card__artwrap { flex: none; }
+
+.hb-coin-badge {
+  position: absolute;
+  right: -4px;
+  top: -4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 5px 2px 2px;
+  border: 1px solid rgba(183, 242, 74, .42);
+  border-radius: 3px;
+  background: rgba(6, 10, 8, .92);
+  line-height: 1;
+}
+.hb-coin-badge__icon {
+  width: 15px; height: 15px; border-radius: 2px; display: block;
+  object-fit: cover;
+}
+.hb-coin-badge__sym {
+  font-family: 'Alagard', serif;
+  font-size: 10px;
+  letter-spacing: .04em;
+  color: var(--lime, #b7f24a);
+}
+
+/* In a row of the odds table the icon sits in the flow, not in a corner. */
+.hb-odds-list .hb-coin-badge { position: static; border: none; background: none; padding: 0; }
+
+/* In the corner of the building the ticker is not repeated: it already stands
+   in the card's name ("CASHCAT Huntsman's Hall"), and a second time right
+   beside it would read as "CASHCAT CASHCAT". But if the picture failed to
+   load, the img removes itself and puts is-textonly on the icon — then the
+   ticker comes back and the corner is not left empty. */
+.hb-building-card__artwrap .hb-coin-badge__sym,
+.hb-drop-card__artwrap .hb-coin-badge__sym { display: none; }
+.hb-coin-badge.is-textonly .hb-coin-badge__sym { display: inline !important; }
+.hb-coin-badge.is-textonly { padding: 2px 5px; }
+
+/* Building card: coin on the left, building on the right.
+ *
+ * Roughly a 30 to 70 split — as in 6PACK. A small icon in the corner read as
+ * a smudge; the coin must take up space proportionate to its role, otherwise
+ * the link "this building is about this coin" has to be held in your head.
+ */
+/* Card grid: many small ones, not a few large ones.
+ *
+ * It used to be minmax(340px) — three per row at 234 pixels tall, and ten
+ * cards took up two screens. A catalogue of ten things has to be seen whole:
+ * people look at it in order to compare, and you can only compare what fits
+ * side by side. 190 pixels give six or seven per row on an ordinary monitor,
+ * that is all ten in two rows without scrolling. */
+.hb-bc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 8px;
+}
+
+/* The coin column is 30%, but never narrower than the longest ticker.
+ *
+ * Exactly 30% broke on long names: with a 300px card the coin was left 86
+ * pixels, and STONKBROKER was torn mid-word into "STONKBROK / ER". It looked
+ * like a typo in someone else's coin name — the worst kind of mistake,
+ * because the layout is not what gets blamed. The font is bitmap, below 16px
+ * there is nothing but mush, so the text cannot be made smaller — it can only
+ * be given room.
+ *
+ * 8em, not pixels: the lower bound was MEASURED in the browser across all six
+ * tickers of the catalogue (STONKBROKER — 107px at a 16px font, plus 16px of
+ * padding = 123px, that is 7.7em), and in em it survives the fourfold font
+ * scaling on 4K, where 16 turns into 32. In pixels it would have broken
+ * silently in exactly the same place it broke before, just on a different
+ * monitor.
+ *
+ * On a narrow card the coin's share grows from 30 to ~36% — a deliberate
+ * trade: better slightly wider than a word torn in half.
+ */
+/* The card is built the 6PACK way: on top a window with the coin icon, under
+ * it the ticker with its rank in the top list, the price, and only then the
+ * building.
+ *
+ * Over there it is argued in css/cards.css like this: the six ranks are the
+ * whole product, people look at them, and a card is obliged to read as a
+ * SEPARATE OBJECT, not as a table cell. That is exactly what ours was: two
+ * columns with no gap, no border of its own, no full-width picture — a
+ * registry row. Hence "you have to scroll to get to the coins": the coin is
+ * not seen, it is read.
+ *
+ * What was taken: a full-width window with the real token icon, a gap instead
+ * of shared borders, its own border. What was not taken: the markup as a
+ * whole — it has its own classes, its own variables and its own grid.
+ */
+/* A card is an object, not a row.
+ *
+ * Its own backing made of the game texture plus its own shadow: without them
+ * a card against the common screen background looks like a piece cut out of
+ * that same background, and ten of them read as a table. In 6PACK this is
+ * argued in the same words — there the card was given a border, a shadow and
+ * a full-width picture precisely because without them it was a cell.
+ *
+ * Its own background, not the common screen background: identical backing on
+ * the card and on the page erases the boundary between them, and the border
+ * starts to look like a ruling line. */
+.hb-bc {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px 7px 8px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-top-width: 3px;
+  border-top-color: rgba(255, 255, 255, .12);
+  border-radius: 6px;
+  background:
+    linear-gradient(rgba(9, 20, 12, .88), rgba(6, 14, 9, .94)),
+    url("../images/bg-settlement-v1.png") center / cover no-repeat;
+  box-shadow: 0 6px 16px -10px rgba(0, 0, 0, .9);
+  overflow: hidden;
+}
+
+/* The card window: 30 coin, 70 building.
+ *
+ * THE HEIGHT IS DERIVED FROM THE BUILDING'S ASPECT RATIO, not assigned as a
+ * number. The sprite is drawn at 512×576, that is 8:9 — it is TALLER than it
+ * is wide. Twice I forced it into a wide box of fixed height, and the
+ * building came out squashed: you could not tell what was drawn on it. Now it
+ * is the other way round: the building is given 70% of the width, its height
+ * follows from 8:9, and the window takes that height.
+ * 0.7 × 9/8 = 0.7875 — hence the window's aspect ratio.
+ *
+ * THE COIN'S SIDE IS PAINTED IN THE COIN'S COLOR. --tone is sampled off the
+ * icon by a script; until it is sampled, a neutral dark stands there. The
+ * lightness is set here rather than taken from the icon: the card is dark,
+ * and the window is obliged to stay dark no matter how bright the coin is,
+ * otherwise a glowing rectangle hangs next to a black card. This too comes
+ * from 6PACK, and it is said there in the same words.
+ */
+.hb-bc__win {
+  position: relative;
+  display: grid;
+  grid-template-columns: 30% 70%;
+  aspect-ratio: 1 / .7875;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 4px;
+  background: var(--tone, rgba(0, 0, 0, .34));
+  overflow: hidden;
+}
+.hb-bc__coin {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 4px 3px;
+  border-right: 1px solid rgba(0, 0, 0, .45);
+  background: var(--tone-hi, rgba(0, 0, 0, .25));
+}
+.hb-bc__coin img { width: 76%; max-width: 46px; aspect-ratio: 1; border-radius: 8px; object-fit: cover; display: block; }
+/* The ticker always sits UNDER the icon, never instead of it: a coin may have
+   no picture — the one in ninth place does not — and an empty square would
+   read as broken layout rather than as "there is no icon". */
+/* The ticker in a narrow column.
+ *
+ * STONKBROKER did not fit and tore mid-word. The font cannot be made smaller
+ * — it is bitmap and below 16px turns into mush — so THE LINE ITSELF is
+ * squeezed horizontally. It suits a bitmap font: the letters get narrower
+ * while the height and the crispness stay the same.
+ *
+ * The factor is set by a script after measuring the text: one and the same
+ * squeeze for "AI" and for "STONKBROKER" would either fail to save the long
+ * one or disfigure the short one.
+ */
+.hb-bc__coin-sym {
+  font-family: 'Alagard', serif;
+  color: rgba(255, 255, 255, .92);
+  text-align: center;
+  line-height: 1.05;
+  white-space: nowrap;
+  display: inline-block;
+  transform: scaleX(var(--sym-squeeze, 1));
+  transform-origin: center;
+}
+/* The building: its own aspect ratio and fully inside the frame. contain, not
+   cover: a cropped roof is again "you cannot tell what this is". */
+.hb-bc__art {
+  background-image: var(--building-art);
+  background-position: left center;
+  /* Sheet of forms: two frames side by side, we take the left one. A width of
+     200% at a height of 100% shows exactly one frame, and it is not stretched,
+     because the box itself is now 8:9. */
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+/* The forge's picture is not a sheet of forms but a single 128×128: we show it whole. */
+.hb-bc[data-seat="4"] .hb-bc__art { background-size: contain; background-position: center; }
+
+.hb-bc__head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.hb-bc__sym { color: var(--lime, #b7f24a); font-family: 'Alagard', serif; overflow-wrap: anywhere; }
+/* Rank in the top list is what replaced the made-up rarity. */
+.hb-bc__rank { color: rgba(234, 245, 238, .45); flex: none; }
+.hb-bc__price { display: flex; align-items: baseline; gap: 8px; }
+.hb-bc__spot { color: rgba(234, 245, 238, .72); }
+.hb-bc__chg.is-up { color: var(--lime, #b7f24a); }
+.hb-bc__chg.is-dn { color: rgba(234, 245, 238, .45); }
+/* The card's name.
+ *
+ * The rule was tied to the .hb-bc__text wrapper, and I removed that wrapper
+ * when rebuilding the card — so the heading silently fell back to the system
+ * 32 pixels, that is to the very breakage I had fixed the day before
+ * yesterday. Because of that the card stayed tall while its window was half
+ * the size: 64 pixels out of 218 were taken by a two-line name.
+ *
+ * Lesson: if you rewrote the markup, check the selectors that were hooked
+ * onto it. CSS does not report a vanished node, it simply stops styling, and
+ * whatever rule is left over wins. Caught by measuring heights, not by eye:
+ * in a screenshot it looked like "the card somehow did not get smaller". */
+.desktop-main-menu .hb-app .hb-bc > h3,
+.hb-bc > h3 {
+  margin: 0;
+  color: var(--ivory, #eaf5ee);
+  font-size: var(--hb-menu-type-display-md, 16px);
+  line-height: var(--hb-menu-line-display-md, 18px);
+}
+.hb-bc__stat {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+  margin: 0;
+  color: rgba(234, 245, 238, .6);
+}
+/* The chance is dimmed next to the income on purpose: first "how much it
+   pays", then "how often it drops". At equal brightness they argue with each
+   other, and the decision gets made by whichever is brighter. */
+.hb-bc__odds { color: rgba(234, 245, 238, .45); white-space: nowrap; }
+.hb-bc__stat b { color: var(--lime, #b7f24a); font-weight: 600; }
+/* The card's stripe is the coin's place in the top 6, not a made-up rarity.
+ *
+ * The rule fits into one phrase: the higher the coin ranks, the brighter the
+ * building. The answer to "why is this rare" no longer has to be invented; it
+ * is live and verifiable.
+ *
+ * data-rarity is kept for the case when there are no ranks yet (first frame,
+ * source failure): an empty stripe would read as "it broke". */
+.hb-bc[data-rarity="common"]    { border-top-color: #8ea89b; }
+.hb-bc[data-rarity="rare"]      { border-top-color: #46d8e0; }
+.hb-bc[data-rarity="epic"]      { border-top-color: #b48cff; }
+.hb-bc[data-rarity="legendary"] { border-top-color: #ffb648; }
+.hb-bc[data-rank="1"] { border-top-color: #ffb648; }
+.hb-bc[data-rank="2"] { border-top-color: #ffd98a; }
+.hb-bc[data-rank="3"] { border-top-color: #b48cff; }
+.hb-bc[data-rank="4"] { border-top-color: #46d8e0; }
+.hb-bc[data-rank="5"] { border-top-color: #7fb59a; }
+.hb-bc[data-rank="6"] { border-top-color: #8ea89b; }
+
+/* ============ REVEAL WINDOW ============
+ *
+ * A building dropping is the only event on the screen, and it used to happen
+ * as a grey line under the button. A line goes unnoticed: you clicked,
+ * something flickered, and whether you got anything is unclear.
+ *
+ * The cards slide in one after another (delay via --i). With ten at once, a
+ * simultaneous appearance reads as a single flash, and you cannot count how
+ * many arrived. The delay here is work, not decoration.
+ */
+.hb-reveal {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(2, 8, 5, .88);
+  animation: hb-reveal-in 160ms ease-out;
+}
+.hb-reveal__panel {
+  width: min(960px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  text-align: center;
+}
+
+/* THE CHEST. The frame is the video itself, with no frame of its own: a border
+   around it would read as a picture on a wall, and this is meant to be the
+   thing happening, not an illustration of it. */
+.hb-reveal__chest {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #050806;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .8);
+}
+.hb-reveal__video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  image-rendering: pixelated;
+}
+
+/* Where the card comes out. The centre of the fire is at 0.477 of the width,
+   measured on the frames — not the geometric centre. Two per cent of the width
+   apart, and visible: a card off the fire reads as a sticker on top of it. */
+.hb-reveal__out {
+  position: absolute;
+  left: 47.7%;
+  top: 46%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 92%;
+}
+
+/* The card does not fly out, it stops being smoke: it comes up through
+   opacity, blur and a barely-there scale. Flight would give it a thrower, and
+   nobody threw it — it is there because the roll already happened. */
+.hb-reveal-card {
+  margin: 0;
+  width: 168px;
+  padding: 9px;
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-top-width: 3px;
+  border-radius: 7px;
+  background: rgba(8, 14, 10, .93);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, .85);
+  animation: hb-card-out 620ms cubic-bezier(.2, .9, .3, 1.1) backwards;
+  /* With ten at once the queue is what lets you count them: all together read
+     as one flash. */
+  animation-delay: calc(var(--i, 0) * 120ms);
+}
+.hb-reveal-card[data-rarity="common"]    { border-top-color: #8ea89b; }
+.hb-reveal-card[data-rarity="rare"]      { border-top-color: #46d8e0; }
+.hb-reveal-card[data-rarity="epic"]      { border-top-color: #b48cff; }
+.hb-reveal-card[data-rarity="legendary"] { border-top-color: #ffb648; }
+
+.hb-reveal-card__win {
+  position: relative;
+  aspect-ratio: 1 / .78;
+  border-radius: 5px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, .38);
+  margin-bottom: 7px;
+}
+.hb-reveal-card__art {
+  position: absolute;
+  inset: 0;
+  background-image: var(--building-art);
+  background-position: center;
+  background-repeat: no-repeat;
+  /* The sheet holds two frames side by side; this shows exactly the left one
+     without stretching it. */
+  background-size: 200% 100%;
+  image-rendering: pixelated;
+}
+/* The coin sits in the corner of the building, with its own plate: without one
+   the corner reads as a sticker, and a dark logo on a dark window reads as a
+   hole in the card. */
+.hb-reveal-card__coin {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  width: 34px;
+  height: 34px;
+  border-radius: 7px;
+  object-fit: cover;
+  background: #0b100d;
+  box-shadow: 0 0 0 1px rgba(234, 245, 238, .18), 0 0 0 3px rgba(9, 15, 12, .8);
+}
+.hb-reveal-card__coin--text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Alagard', serif;
+  font-size: 10px;
+  color: rgba(234, 245, 238, .9);
+}
+.hb-reveal-card figcaption { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; text-align: left; }
+.hb-reveal-card__sym { font-family: 'Alagard', serif; font-size: 12px; color: var(--lime, #b7f24a); letter-spacing: .04em; }
+.hb-reveal-card strong { font-family: 'Alagard', serif; font-size: 16px; color: var(--ivory, #eaf5ee); line-height: 1.1; }
+.hb-reveal-card__power { font-size: 12px; color: rgba(234, 245, 238, .58); }
+
+.hb-reveal__after { margin-top: 14px; }
+.hb-reveal__proof { margin: 0 0 12px; font-size: 12px; color: rgba(234, 245, 238, .45); overflow-wrap: anywhere; }
+.hb-reveal__proof code { font-family: ui-monospace, Menlo, Consolas, monospace; color: rgba(234, 245, 238, .7); }
+.hb-reveal__bad { color: #ff8a6b; font-family: 'Alagard', serif; font-size: 17px; }
+
+@keyframes hb-reveal-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes hb-card-out {
+  from { opacity: 0; transform: translateY(16px) scale(.88); filter: blur(10px); }
+  to   { opacity: 1; transform: none; filter: none; }
+}
+/* Someone bothered by motion is not shown it — but the card stays in place
+   rather than disappearing along with the animation. The chest still opens:
+   it is the content, not an effect, and without it there is nothing to look
+   at while the gate runs. */
+@media (prefers-reduced-motion: reduce) {
+  .hb-reveal, .hb-reveal-card { animation: none; }
+}
+
+/* ============ SCREEN BACKGROUND ============
+ *
+ * The same one on both: this is a single section split into "what I have" and
+ * "where to get it". Different pictures would say these are different places.
+ *
+ * The picture is heavily darkened and sits under the content: the background
+ * here is depth, not illustration. On a light background both the numbers and
+ * the dimmed lines of pending sources — the whole reason this was written —
+ * would disappear.
+ */
+.hb-main.hb-buildings-screen,
+.hb-main.hb-pulls-screen {
+  position: relative;
+  background:
+    linear-gradient(rgba(4, 12, 7, .93), rgba(4, 12, 7, .97)),
+    url("../images/bg-gacha-v1.png") center / cover no-repeat fixed;
+}
+
+/* The hold explanation is collapsed, by the same technique as the odds.
+ *
+ * The ladder of five thresholds (100 000 … 100 000 000) first of all
+ * announced a volume the person does not have, and said nothing about what
+ * they get for it. Numbers of that size read as "do not go here". Expanded,
+ * it took up a third of the panel; collapsed, it is one line, and it opens
+ * for whoever is actually deciding how much to buy.
+ */
+.holdings-panel__more { margin-top: 8px; }
+.holdings-panel__more > summary {
+  cursor: pointer;
+  color: rgba(234, 245, 238, .62);
+  list-style: none;
+}
+.holdings-panel__more > summary::-webkit-details-marker { display: none; }
+.holdings-panel__more > summary::after { content: " ▾"; color: rgba(234, 245, 238, .4); }
+.holdings-panel__more[open] > summary::after { content: " ▴"; }
+.holdings-panel__actions { margin-top: 10px; }
+/* A link styled as a button: different tag, same look. Without this "Buy"
+   would have looked like an ordinary link in the middle of a panel of buttons
+   and read as a footnote. */
+.holdings-panel__actions .hb-ledger-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  text-decoration: none;
+}
+
+/* The rules for the odds spoiler were deleted together with the table: the
+   chance now stands on the card itself. A dead selector would send the next
+   person looking for markup that does not exist. */
+
+/* The banner about a roll received. It appears during combat, so it is not a
+   modal: a modal in the middle of a fight is an obstacle, not a reward. Down
+   in the corner, so that it does not cover the player. */
+.hb-roll-toast {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 9500;
+  padding: 10px 16px;
+  border: 1px solid var(--lime, #b7f24a);
+  border-radius: 8px;
+  background: rgba(8, 20, 12, .96);
+  color: var(--lime, #b7f24a);
+  font-family: 'Alagard', serif;
+  box-shadow: 0 10px 26px -12px rgba(0, 0, 0, .9);
+  animation: hb-toast-in 200ms ease-out;
+}
+@keyframes hb-toast-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .hb-roll-toast { animation: none; } }
+
+/* A long ticker wraps rather than being squeezed to half width. The class is
+   set by a script after measuring the text: a squeeze below 0.8 reads worse
+   than a broken line. */
+/* The is-wrapped class is gone: the ticker never wraps. A name torn mid-word
+   ("STONK BROKE R") reads worse than a small one — the eye completes the
+   wrong ticker. What does not fit is fixed by squeezing and by font size. */
+
+/* ============ SHOP ============
+   Row after row: rarity name, price, button. A grid, not a table — the price
+   and the button must stand on the same vertical in every row, otherwise the
+   eye hunts for the button anew on each of them. */
+.hb-shop-wallet {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.hb-shop-wallet div {
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 5px;
+  background: rgba(10, 24, 14, .6);
+}
+.hb-shop-wallet dt { color: rgba(234, 245, 238, .55); }
+.hb-shop-wallet dd { margin: 2px 0 0; }
+.hb-shop-list { display: grid; gap: 6px; }
+.hb-shop-row {
+  display: grid;
+  grid-template-columns: 1fr auto 110px;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-left-width: 3px;
+  border-radius: 5px;
+  background: rgba(10, 24, 14, .6);
+}
+.hb-shop-row[data-rarity="common"]    { border-left-color: #8ea89b; }
+.hb-shop-row[data-rarity="uncommon"]  { border-left-color: #7fb59a; }
+.hb-shop-row[data-rarity="rare"]      { border-left-color: #46d8e0; }
+.hb-shop-row[data-rarity="epic"]      { border-left-color: #b48cff; }
+.hb-shop-row[data-rarity="legendary"] { border-left-color: #ffb648; }
+.hb-shop-name { color: var(--ivory, #eaf5ee); font-family: 'Alagard', serif; }
+.hb-shop-price { color: rgba(234, 245, 238, .72); white-space: nowrap; }
+/* The shop screen scrolls by itself: five rows plus the wallet do not fit
+   into a short window, and .hb-main here is the same two-row grid as
+   everywhere else. */
+.hb-main.hb-shop-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 20px 24px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.hb-main.hb-shop-screen > * { flex: 0 0 auto; }
+.hb-main.hb-shop-screen > .hb-screen-heading { height: auto; min-height: 0; }
+
+/* The loot card on the main screen: two numbers per row, as in the other panels. */
+.hb-haul { display: flex; gap: 16px; margin: 8px 0 0; }
+.hb-haul dt { color: rgba(234, 245, 238, .55); }
+.hb-haul dd { margin: 2px 0 0; }
+
+/* The shards card on the main screen: text on the left, numbers on the right
+   — like the other hunt cards. The dl used to sit under the text and the card
+   sprawled. */
+.hb-hunt-card--haul {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.hb-hunt-card--haul .hb-hunt-card__copy { min-width: 0; }
+.hb-haul { display: flex; gap: 18px; margin: 0; flex: none; }
+.hb-haul dt { color: rgba(234, 245, 238, .55); }
+.hb-haul dd { margin: 2px 0 0; }
+
+/* The note above the card catalogue: why all ten have the same income.
+   It stands once above the grid instead of ten times inside the cards, and it
+   disappears by itself as soon as the first building in the world starts
+   earning. */
+.hb-pull-note--catalogue {
+  margin: 0 0 14px;
+  max-width: 64ch;
+  line-height: 1.5;
+  color: rgba(234, 245, 238, .62);
+}
+.hb-pull-note--catalogue[hidden] { display: none; }
