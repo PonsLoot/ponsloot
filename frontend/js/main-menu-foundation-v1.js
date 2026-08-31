@@ -159,15 +159,18 @@
   function contractChip() {
     return `<span class="hb-contract" data-contract hidden>
       <code class="hb-contract__addr" data-contract-short></code>
+      <!-- WORDS, NOT A GLYPH. I had put two overlapping icons here — a page
+           pair and a tick — reasoning that an icon needs no translation and
+           costs no width. It costs something else: nobody presses a symbol they
+           have not been told the meaning of, and this is the one control on the
+           page whose whole job is to be pressed by a stranger. "copy contract"
+           says what happens; the tick that replaces it says it happened.
+           The width is fixed for both labels so the chip cannot twitch when
+           they swap. -->
       <button class="hb-contract__copy" type="button" data-contract-copy
               title="Copy contract address" aria-label="Copy contract address">
-        <svg class="hb-contract__ico" viewBox="0 0 16 16" aria-hidden="true">
-          <rect x="5.5" y="1.5" width="9" height="11" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/>
-          <path d="M10.5 14.5H3a1.5 1.5 0 0 1-1.5-1.5V4.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-        </svg>
-        <svg class="hb-contract__ok" viewBox="0 0 16 16" aria-hidden="true">
-          <path d="M2.5 8.5l3.6 3.6L13.5 4.7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <span class="hb-contract__word">copy contract</span>
+        <span class="hb-contract__word hb-contract__word--ok">copied</span>
       </button>
     </span>`;
   }

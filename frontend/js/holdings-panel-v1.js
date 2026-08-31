@@ -63,6 +63,30 @@
     </div>`;
   }
 
+  /* WHAT THIS SCREEN OFFERS, and why it stopped offering anything.
+   *
+   * The line used to be `reason === "no_wallet" ? walletButton() : buyLink()`,
+   * which reads correctly and is wrong, because the reasons are ranked: when
+   * there is no token address the reason is "token_not_launched" and it masks
+   * "no_wallet" entirely. So the moment the contract was cleared, the branch
+   * fell through to buyLink, buyLink has no address to sell at either, and the
+   * screen ended up with no buttons at all — a panel that says "holding opens
+   * slots" and offers no way to do anything about it.
+   *
+   * LINKING A WALLET DOES NOT DEPEND ON THE TOKEN. It is the player's own
+   * wallet, the one a faucet or a distribution pays to, and it is worth linking
+   * before the launch as much as after. So the wallet is asked for whenever
+   * there is none, whatever the token is doing — `summary.wallet` says that
+   * directly and is not ranked against anything.
+   *
+   * Only after a wallet exists does the question become "get the token", and
+   * only if there is somewhere to get it.
+   */
+  function actions(summary) {
+    if (!summary.wallet) return walletButton();
+    return buyLink();
+  }
+
   function walletButton() {
     return `<button class="hb-ledger-button is-primary" type="button" data-shell-destination="account-settings">Link wallet</button>`;
   }
@@ -157,7 +181,7 @@
       </dl>` : ""}
       ${contractLine()}
       <div class="holdings-panel__actions">
-        ${summary.reason === "no_wallet" ? walletButton() : buyLink()}
+        ${actions(summary)}
       </div>
       <details class="holdings-panel__more">
         <summary>How holding pays</summary>

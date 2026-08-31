@@ -908,19 +908,29 @@ body.is-running .induction-modal {
   outline: 2px solid rgba(183, 242, 74, .8);
   outline-offset: -2px;
 }
-.hb-app .hb-contract__copy svg { width: 17px; height: 17px; display: block; }
-
-/* Two icons stacked, one shown. Nothing is swapped by script, so the button
-   does not jump in width at the moment of the swap. */
-.hb-app .hb-contract__ok { display: none; }
+/* The button is now words, so it needs a width of its own. Both labels sit in
+   the same fixed box — "copy contract" and "copied" are different lengths, and
+   a chip that changes width the instant it is pressed reads as a glitch rather
+   than as confirmation. */
+.hb-app .hb-contract__copy {
+  width: auto;
+  padding: 0 13px;
+  font-family: 'Alagard', serif;
+  font-size: 14px;
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+.hb-app .hb-contract__word--ok { display: none; }
 .hb-app .hb-contract__copy.is-done { background: rgba(183, 242, 74, .9); color: #0d1411; }
-.hb-app .hb-contract__copy.is-done .hb-contract__ico { display: none; }
-.hb-app .hb-contract__copy.is-done .hb-contract__ok { display: block; }
+.hb-app .hb-contract__copy.is-done .hb-contract__word { display: none; }
+.hb-app .hb-contract__copy.is-done .hb-contract__word--ok { display: inline; }
 /* On failure the icon stays and only the colour changes: lying with a tick is
    worse than saying nothing. */
 .hb-app .hb-contract__copy.is-failed { background: rgba(255, 210, 74, .22); color: #ffd24a; }
 
 /* Narrow screens keep the button: copying matters more than reading. */
+/* Narrow screens drop the address and keep the words: copying matters more
+   than reading, and a lone button with no label is the thing we just removed. */
 @media (max-width: 1100px) {
   .hb-app .hb-contract__addr { display: none; }
   .hb-app .hb-contract { padding-left: 0; }
