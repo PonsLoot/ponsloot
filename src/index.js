@@ -762,6 +762,15 @@ app.get("/api/v1/token", async (_req, res) => {
       address: valid ? address : null,
       launched: valid,
       source,
+      /* Whether anything is waiting underneath. The console value can be
+       * cleared; the deploy-time variable cannot be, not from here. Without
+       * this flag "press Clear" is advice with an unknown outcome — the field
+       * may empty, or the old address may reappear from the variable, and
+       * which of the two happens is not visible from outside.
+       *
+       * A boolean, never the value: whether a variable is configured is not a
+       * secret, what it contains might be. */
+      hasEnvironmentFallback: Boolean(fromEnvironment),
       chainId: Number(process.env.CHAIN_ID) || 4663,
     });
   } catch (e) {

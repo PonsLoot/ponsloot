@@ -100,17 +100,13 @@
     <p class="note" id="hint"></p>
     <div class="row" style="margin-top:14px">
       <button class="ghost" id="refresh" type="button">Check again</button>
-      <!-- LINKING HAPPENS IN THE GAME, and this is a link rather than a form.
-           The wallet flow signs a message through the account runtime; building
-           a second copy of it here would mean two implementations of the one
-           thing that proves who owns an address, and they would drift. So the
-           page sends you to the place that already does it, and says where to
-           press once you are there. -->
-      <a class="ghost-link" href="/" target="_blank" rel="noopener">Link a wallet →</a>
     </div>
-    <p class="note">Slots only open for a wallet that holds the token. Linking is
-      in the game: <b>Account &amp; Settings → Connect Wallet</b>. Come back here
-      and press Check again.</p>
+    <!-- NO WALLET BUTTON HERE, and that was a wrong turn worth recording.
+         The wallet in Account & Settings is a PLAYER'S wallet — the one a
+         faucet and any distribution would pay to. It has nothing to do with
+         setting the project's contract, and putting a link to it on this page
+         suggested that pasting an address required linking something first.
+         Two different wallets, one word. -->
   </div>
 </div>
 
@@ -159,6 +155,9 @@
           hint = "This address is the TOKEN_ADDRESS variable set on the service, not something typed here. Saving below overrides it; clearing brings it back.";
         } else if (t.source === "console") {
           rows.push(["Where it comes from", '<span class="yes">typed here</span>']);
+          hint = t.hasEnvironmentFallback
+            ? "Clearing this removes what was typed, and the TOKEN_ADDRESS variable set on the service takes over — the field will not end up empty."
+            : "Clearing this leaves no address at all: the chip disappears from the header and the pool goes back to saying the token has not launched.";
         }
         rows.push(["Chain", "<b>" + esc(t.chainId) + "</b>"]);
         if (!t.launched) hint = "Until an address is saved, the header chip stays hidden and the payout pool says the token has not launched.";
@@ -205,9 +204,14 @@
           no_wallet: "no wallet linked on this browser",
           read_failed: "the chain did not answer balanceOf — wrong address, or no RPC"
         };
-        rows.push(["Slots open", h.reason ? '<span class="no">' + esc(reasons[h.reason] || h.reason) + "</span>"
+        /* Labelled as this browser's player, not as the project. Slots belong
+           to whoever is holding the token in the account this browser is signed
+           into; on an admin's machine that is usually nobody, and "no wallet
+           linked" here is normal rather than a fault to fix. */
+        rows.push(["Slots for this browser's player", h.reason ? '<span class="no">' + esc(reasons[h.reason] || h.reason) + "</span>"
                                           : "<b>" + esc(h.buildings != null ? h.buildings : "—") + "</b>"]);
-        if (h.reason && reasons[h.reason]) hint = hint || reasons[h.reason];
+        // Not promoted to the hint: an admin with no wallet linked is the
+        // normal case, and repeating it as advice makes it look like a problem.
       })
       .catch(function () { /* the rows already gathered are still worth showing */ })
       .then(function () {
@@ -253,7 +257,38 @@
   });
 
   $("clear").addEventListener("click", function () { post({ clearToken: true }); });
-  $("refresh").addEventListener("click", refresh);
+
+  /* WHEN THE CURRENT ADDRESS WAS SET, if the admin token is to hand.
+   *
+   * Added because the question came up and could not be answered: an address
+   * was sitting in the field that nobody remembered putting there, and "which
+   * of us typed this" is unanswerable while the only thing on screen is the
+   * value. The date is stored — app_settings has updated_at — it simply was
+   * never shown.
+   *
+   * Behind the admin token because it comes from the admin route. Silent when
+   * the field is empty: this is an extra, not a requirement. */
+  function when() {
+    var token = $("token").value.trim();
+    if (!token) return;
+    fetch("/api/v1/admin/chain", {
+      credentials: "same-origin",
+      headers: { "x-loothood-admin": token }
+    })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.token || !d.token.updatedAt) return;
+        var el = document.createElement("dt");
+        el.textContent = "Set on";
+        var v = document.createElement("dd");
+        v.textContent = new Date(d.token.updatedAt).toISOString().replace("T", " ").slice(0, 16) + " UTC";
+        $("status").appendChild(el);
+        $("status").appendChild(v);
+      })
+      .catch(function () { /* an extra that failed is not worth a message */ });
+  }
+  $("token").addEventListener("change", function () { refresh().then(when); });
+  $("refresh").addEventListener("click", function () { refresh().then(when); });
   refresh();
 })();
 </script>
