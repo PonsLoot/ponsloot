@@ -419,7 +419,7 @@
  * The box has no width of its own. It is as wide as the music button's
  * min-width, and `justify-items: stretch` makes the chip match, which is why
  * the two right edges line up without a number appearing anywhere. */
-.hb-account-corner {
+.hb-account-dock {
   position: absolute;
   z-index: var(--hb-ui-layer-sticky);
   right: 4%;
@@ -490,7 +490,7 @@
     line-height: 28px;
   }
 
-  .hb-account-corner {
+  .hb-account-dock {
     right: 3%;
     bottom: 3%;
   }
@@ -534,7 +534,7 @@
   /* On a phone the panel takes the whole bottom of the screen, so the corner
      moves to the top, where nothing else is. It is not dropped: a stranger
      arriving from a post on a phone is exactly who the contract is here for. */
-  .hb-account-corner {
+  .hb-account-dock {
     top: 12px;
     right: 12px;
     bottom: auto;
