@@ -296,6 +296,89 @@
 }
 .hb-account-music strong { color: var(--ivory); }
 
+/* ============ CONTRACT ON THE LOGIN SCREEN ============
+ *
+ * The skin is copied from the music button above on purpose, down to the
+ * radius and the blur: the two sit one under the other in the same corner, and
+ * anything else would read as two unrelated things that happen to be near each
+ * other. The layout lives in account-gate-v1.css, this is only the surface.
+ *
+ * Note what is NOT reused: the header chip in the game (.hb-contract) is
+ * styled under `.hb-app`, and the login screen is outside it. Hanging the
+ * login chip on those rules would have meant either widening a selector that
+ * belongs to the game header or letting the chip arrive unstyled, which is how
+ * it looked the first time I tried. */
+.hb-account-contract {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: stretch;
+  min-height: var(--hb-ui-touch-target, 44px);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(15, 22, 19, .86);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  overflow: hidden;
+  line-height: 1;
+}
+
+/* The chip is drawn on every load and unhidden only once an address arrives.
+   Without this the `hidden` attribute loses to `display: grid` and the empty
+   box hangs in the corner before launch. */
+.hb-account-contract[hidden] { display: none; }
+
+.hb-account-contract__addr {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px 10px 14px;
+  font-family: var(--body);
+  font-size: 13px;
+  letter-spacing: .02em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.hb-account-contract__copy {
+  display: grid;
+  place-items: center;
+  padding: 10px 14px;
+  border: 0;
+  border-left: 1px solid var(--line);
+  border-radius: 0;
+  background: rgba(183, 242, 74, .10);
+  box-shadow: none;
+  text-shadow: none;
+  color: var(--lime);
+  font-family: var(--body);
+  font-size: 13px;
+  letter-spacing: .02em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background .14s, color .14s;
+}
+
+.hb-account-contract__copy:hover { background: rgba(183, 242, 74, .2); }
+.hb-account-contract__copy:focus-visible {
+  outline: 2px solid rgba(183, 242, 74, .8);
+  outline-offset: -2px;
+}
+
+/* Both words occupy the same grid cell, so the button is permanently as wide
+   as the longer one and only visibility decides which is painted. The header
+   chip learned this the hard way: swapping the text made it shrink from 146
+   pixels to 79 at the moment of the press, which reads as a glitch rather than
+   as confirmation. */
+.hb-account-contract__word { grid-area: 1 / 1; }
+.hb-account-contract__word.is-ok { visibility: hidden; }
+.hb-account-contract__copy.is-done { background: rgba(183, 242, 74, .9); color: #0d1411; }
+.hb-account-contract__copy.is-done .hb-account-contract__word { visibility: hidden; }
+.hb-account-contract__copy.is-done .hb-account-contract__word.is-ok { visibility: visible; }
+
+/* On failure the words stay and only the colour changes. Showing "copied" when
+   nothing was copied is worse than saying nothing: the full address is in the
+   chip's tooltip either way. */
+.hb-account-contract__copy.is-failed { background: rgba(255, 210, 74, .22); color: #ffd24a; }
+
 @media (prefers-reduced-motion: reduce) {
   .hb-account-panel { animation: none; }
 }

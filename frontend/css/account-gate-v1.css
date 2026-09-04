@@ -408,11 +408,28 @@
   display: flex;
 }
 
-.hb-account-music {
+/* The corner of the login screen. Everything in it stacks up from one point.
+ *
+ * The music button used to place itself: absolute, right 4%, bottom 5%. When
+ * the contract chip joined it, pinning a second absolute element above the
+ * first would have meant writing down the first one's height, which changes
+ * with the font and with every media query. So the placement moved out here,
+ * and both children became ordinary blocks in a grid.
+ *
+ * The box has no width of its own. It is as wide as the music button's
+ * min-width, and `justify-items: stretch` makes the chip match, which is why
+ * the two right edges line up without a number appearing anywhere. */
+.hb-account-corner {
   position: absolute;
   z-index: var(--hb-ui-layer-sticky);
   right: 4%;
   bottom: 5%;
+  display: grid;
+  gap: var(--hb-ui-space-2);
+  justify-items: stretch;
+}
+
+.hb-account-music {
   min-width: 300px;
   display: grid;
   grid-template-columns: auto 1fr auto;
@@ -473,9 +490,12 @@
     line-height: 28px;
   }
 
-  .hb-account-music {
+  .hb-account-corner {
     right: 3%;
     bottom: 3%;
+  }
+
+  .hb-account-music {
     min-width: 260px;
   }
 }
@@ -511,6 +531,17 @@
     width: min(76%, 280px);
   }
 
+  /* On a phone the panel takes the whole bottom of the screen, so the corner
+     moves to the top, where nothing else is. It is not dropped: a stranger
+     arriving from a post on a phone is exactly who the contract is here for. */
+  .hb-account-corner {
+    top: 12px;
+    right: 12px;
+    bottom: auto;
+  }
+
+  /* The music button is the one thing here that can go. It is a comfort, the
+     address is the errand. */
   .hb-account-music {
     display: none;
   }

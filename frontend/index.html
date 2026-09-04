@@ -34,7 +34,7 @@
   <link rel="stylesheet" href="css/loothood-core-v1.css?v=r28">
   <link rel="stylesheet" href="css/loothood-patch-v1.css?v=r70">
   <link rel="stylesheet" href="css/loothood-pulls-v1.css?v=r20">
-  <link rel="stylesheet" href="css/loothood-gate-v1.css?v=r28">
+  <link rel="stylesheet" href="css/loothood-gate-v1.css?v=r29">
   <link rel="stylesheet" href="css/loothood-loadout-v1.css?v=r65">
   <link rel="stylesheet" href="css/loothood-bounties-v1.css?v=r30">
   <link rel="stylesheet" href="css/loothood-guide-v1.css?v=r20">
@@ -49,7 +49,10 @@
   <link rel="stylesheet" href="css/in-run-reward-choice-v1.css?v=r17">
   <link rel="stylesheet" href="css/run-outcome-family-v1.css">
   <link rel="stylesheet" href="css/mobile-in-run-pc-parity-v1.css">
-  <link rel="stylesheet" href="css/account-gate-v1.css">
+  <!-- A version on the gate stylesheet at last. It had none, so a returning
+       player kept the cached copy and the corner box would have arrived without
+       its placement: the chip in one place, the music button in another. -->
+  <link rel="stylesheet" href="css/account-gate-v1.css?v=r2">
   <link rel="stylesheet" href="css/account-settings-v1.css">
   <link rel="stylesheet" href="css/tutorial-guidance-v1.css?v=r17">
   <link rel="stylesheet" href="css/mobile-ui-reliability-v1.css">
@@ -161,9 +164,36 @@
       <div class="hb-account-scroll-cue" aria-hidden="true">↓ More</div>
     </div>
 
-    <button class="hb-account-music" id="accountLoginMusicToggle" type="button" aria-pressed="true" aria-label="Mute music">
-      <span aria-hidden="true">♫</span><span><small></small><strong></strong></span><b>Music on</b>
-    </button>
+    <!-- The corner of the login screen: the contract, then the music.
+         ==================================================================
+         The address belongs HERE and not only in the game's header, because
+         this is the screen a stranger arrives on. Someone who followed a link
+         from a post wants the contract before they want a run, and until now
+         they had to press "continue as guest", wait out the boot and find the
+         chip in the header of a game they had not asked to play.
+
+         The chip draws itself hidden and stays that way while no token is set
+         (contract-chip-v1.js unhides it once /api/v1/token answers with an
+         address), so before launch this corner looks exactly as it did.
+
+         Both live in one box so the music button keeps its own placement rules
+         and the chip inherits them. The music button disappears on phones and
+         in short landscape; the chip does not, because copying an address is
+         the one thing on this screen worth doing from a phone. -->
+    <div class="hb-account-corner">
+      <span class="hb-account-contract" data-contract hidden>
+        <code class="hb-account-contract__addr" data-contract-short></code>
+        <button class="hb-account-contract__copy" type="button" data-contract-copy
+                title="Copy contract address" aria-label="Copy contract address">
+          <span class="hb-account-contract__word">copy contract</span>
+          <span class="hb-account-contract__word is-ok">copied</span>
+        </button>
+      </span>
+
+      <button class="hb-account-music" id="accountLoginMusicToggle" type="button" aria-pressed="true" aria-label="Mute music">
+        <span aria-hidden="true">♫</span><span><small></small><strong></strong></span><b>Music on</b>
+      </button>
+    </div>
   </section>
   <div id="combatSafeAreaProbe" class="combat-safe-area-probe" aria-hidden="true"></div>
   <main id="appBackground" class="app-shell" data-overlay-background="app">
@@ -821,7 +851,7 @@
   <script src="js/guide-content-v1.js?v=r55"></script>
   <script src="js/docs-content-v1.js?v=r60"></script>
   <script src="js/main-menu-foundation-v1.js?v=r69"></script>
-  <script src="js/contract-chip-v1.js?v=r18"></script>
+  <script src="js/contract-chip-v1.js?v=r19"></script>
   <script src="js/status-panel-v1.js?v=r17"></script>
   <script src="js/game.js?v=r67"></script>
   <script src="js/account-settings-v1.js?v=r61"></script>

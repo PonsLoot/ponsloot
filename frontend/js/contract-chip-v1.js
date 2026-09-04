@@ -84,20 +84,25 @@
     });
   }
 
-  /* Feedback — by swapping a CLASS, not by swapping the contents.
+  /* The answer to a press is a CLASS, on whichever button asked for the copy.
    *
-   * This used to rewrite textContent, and the button jumped around in width:
-   * "copy" and "copied" are of different lengths, and there is a frame next to
-   * it that twitched because of that. Now both icons sit inside the button and
-   * one of them is shown. */
-  /* The response is a class, on any button that asked for the copy.
+   * The header chip swaps two words by class, the line on the Estate screen is
+   * one word, the chip on the login screen is a third. All three work from the
+   * same class because none of them is named here: whoever adds a fourth copy
+   * button gets the feedback without touching this file. Swapping textContent
+   * instead, as the first version did, made the button jump in width: "copy
+   * contract" and "copied" are different lengths.
    *
-   * The header chip swaps two icons by class; the line on the Estate screen is
-   * a word. Both work from the same class because neither is renamed here —
-   * whoever adds a third copy button gets the same feedback without touching
-   * this file. Swapping textContent instead, as the first version did, made
-   * the button jump in width: "copy" and "copied" are different lengths. */
-  function respond(button, cls) {
+   * THIS FUNCTION WAS CALLED `respond` AND NOBODY CALLED IT. Both call sites
+   * below say `flash`, which was the name it had before a rename, and `flash`
+   * existed nowhere. The copy itself still worked, so the address really did
+   * land in the clipboard, and the ReferenceError was thrown inside a promise
+   * handler where nothing is watching: no red in the console anyone would look
+   * at, and the button stayed exactly as it was after the press. A control that
+   * does its job and shows nothing is the failure mode I have been told about
+   * twice, and it survived here because the address was cleared at the time and
+   * the chip was hidden, so the button could not be pressed at all. */
+  function flash(button, cls) {
     button.classList.remove("is-done", "is-failed");
     button.classList.add(cls);
     root.setTimeout(function () { button.classList.remove(cls); }, 1500);
